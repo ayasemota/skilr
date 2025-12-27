@@ -10,7 +10,7 @@ interface PaymentsPageProps {
   onAddPayment: (payment: Payment) => void;
 }
 
-const VAT_RATE = 6;
+const VAT_RATE = 4;
 const TRANSACTION_FEE = Math.floor(Math.random() * (600 - 400 + 1)) + 300;
 
 export const PaymentsPage = ({
@@ -25,12 +25,7 @@ export const PaymentsPage = ({
 
   const stats = useMemo(() => {
     const total = payments.reduce((sum, p) => sum + p.amount, 0);
-    const now = new Date();
-    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const weekTotal = payments
-      .filter((p) => new Date(p.date) >= weekAgo)
-      .reduce((sum, p) => sum + p.amount, 0);
-    return { total, weekTotal };
+    return { total };
   }, [payments]);
 
   const baseAmount = paymentAmount ? parseFloat(paymentAmount) : 0;
@@ -55,7 +50,7 @@ export const PaymentsPage = ({
       onSuccess: (response: PaystackResponse) => {
         const newPayment: Payment = {
           id: Date.now(),
-          amount: total,
+          amount: baseAmount,
           date: new Date().toISOString().split("T")[0],
           status: "Completed",
           reference: response.reference,
@@ -167,7 +162,7 @@ export const PaymentsPage = ({
           </div>
           <button
             onClick={handleConfirmPayment}
-            className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg"
+            className="w-full py-3 bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg"
           >
             Pay
           </button>
@@ -179,7 +174,7 @@ export const PaymentsPage = ({
   return (
     <div className="space-y-6">
       <div className="grid gap-6 md:grid-cols-3">
-        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20 rounded-2xl p-6">
+        <div className="bg-linear-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20 rounded-2xl p-6">
           <h3 className="text-sm font-medium text-gray-400 mb-2">
             Total Amount Paid
           </h3>
@@ -187,15 +182,15 @@ export const PaymentsPage = ({
             ₦{stats.total.toFixed(2)}
           </p>
         </div>
-        <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-2xl p-6">
+        <div className="bg-linear-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-2xl p-6">
           <h3 className="text-sm font-medium text-gray-400 mb-2">
-            Paid This Week
+            Unclared Amount
           </h3>
           <p className="text-3xl font-bold text-white">
-            ₦{stats.weekTotal.toFixed(2)}
+            ₦0
           </p>
         </div>
-        <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20 rounded-2xl p-6">
+        <div className="bg-linear-to-br from-green-500/10 to-green-600/10 border border-green-500/20 rounded-2xl p-6">
           <h3 className="text-sm font-medium text-gray-400 mb-2">
             Total Transactions
           </h3>
@@ -214,7 +209,7 @@ export const PaymentsPage = ({
               value={paymentAmount}
               onChange={(e) => setPaymentAmount(e.target.value)}
               placeholder="0.00"
-              min="100"
+              min="0"
               step="1000"
               className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors duration-300"
             />
@@ -222,7 +217,7 @@ export const PaymentsPage = ({
           <button
             onClick={handleContinue}
             disabled={!paymentAmount || parseFloat(paymentAmount) < 100}
-            className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+            className="w-full py-3 bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
             Continue
           </button>

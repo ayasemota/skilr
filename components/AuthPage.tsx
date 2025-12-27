@@ -1,4 +1,3 @@
-// components/AuthPage.tsx
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { SignUpForm } from "@/types";
@@ -24,17 +23,15 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
   });
 
   const handleSignUp = () => {
-    // Demo mode - allow submission with empty fields
     onSignUp(signUpForm);
   };
 
   const handleSignIn = () => {
-    // Demo mode - allow submission with empty fields
     onSignIn(signInForm.email, signInForm.password);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-12">
           <div className="flex justify-center mb-4">
@@ -66,7 +63,7 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
                         firstName: e.target.value,
                       })
                     }
-                    placeholder="Alex"
+                    placeholder="John"
                     className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors duration-300"
                   />
                 </div>
@@ -80,7 +77,7 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
                     onChange={(e) =>
                       setSignUpForm({ ...signUpForm, lastName: e.target.value })
                     }
-                    placeholder="Thompson"
+                    placeholder="Doe"
                     className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors duration-300"
                   />
                 </div>
@@ -95,7 +92,7 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
                   onChange={(e) =>
                     setSignUpForm({ ...signUpForm, email: e.target.value })
                   }
-                  placeholder="your@email.com"
+                  placeholder="johndoe@domain.com"
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors duration-300"
                 />
               </div>
@@ -146,7 +143,7 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
               </div>
               <button
                 onClick={handleSignUp}
-                className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="w-full py-3 bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 Create Account
               </button>
@@ -172,7 +169,7 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
                   onChange={(e) =>
                     setSignInForm({ ...signInForm, email: e.target.value })
                   }
-                  placeholder="your@email.com"
+                  placeholder="johndoe@domain.com"
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors duration-300"
                 />
               </div>
@@ -192,7 +189,7 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
               </div>
               <button
                 onClick={handleSignIn}
-                className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="w-full py-3 bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 Sign In
               </button>

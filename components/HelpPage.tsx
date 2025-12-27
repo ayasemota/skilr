@@ -1,6 +1,6 @@
 export const HelpPage = () => (
   <div className="space-y-6">
-    <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-8">
+    <div className="bg-linear-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-8">
       <h1 className="text-3xl font-bold text-white mb-2">Help & Support</h1>
       <p className="text-gray-400">Find answers to commonly asked questions</p>
     </div>
