@@ -11,7 +11,7 @@ interface PaymentsPageProps {
 }
 
 const VAT_RATE = 6;
-const TRANSACTION_FEE = 500;
+const TRANSACTION_FEE = Math.floor(Math.random() * (600 - 400 + 1)) + 300;
 
 export const PaymentsPage = ({
   user,
@@ -164,18 +164,12 @@ export const PaymentsPage = ({
                 </div>
               </div>
             </div>
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-              <p className="text-blue-400 text-sm">
-                <strong>Note:</strong> You will be redirected to Paystack to
-                complete your payment securely.
-              </p>
-            </div>
           </div>
           <button
             onClick={handleConfirmPayment}
             className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg"
           >
-            Pay with Paystack
+            Pay
           </button>
         </div>
       </div>

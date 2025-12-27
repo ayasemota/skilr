@@ -6,8 +6,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { Payment } from "@/types";
 import { AuthPage } from "@/components/AuthPage";
 import { Sidebar } from "@/components/Sidebar";
-import { UpdateProfileModal } from "@/components/UpdateProfileModal";
-import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { DashboardPage } from "@/components/DashboardPage";
 import { PaymentsPage } from "@/components/PaymentsPage";
 import { HelpPage } from "@/components/HelpPage";
@@ -16,37 +14,22 @@ import { Logo } from "@/components/Logo";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 
 export default function Home() {
-  const { isLoggedIn, user, signUp, signIn, signOut, updateUser } = useAuth();
+  const { isLoggedIn, user, signUp, signIn, signOut } = useAuth();
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [showUpdateProfile, setShowUpdateProfile] = useState(false);
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [payments, setPayments] = useState<Payment[]>([
-    { id: 1, amount: 265000, date: "2024-12-20", status: "Completed" },
-    { id: 2, amount: 190800, date: "2024-11-15", status: "Completed" },
-  ]);
+  const [payments, setPayments] = useState<Payment[]>([]);
 
   const handleAddPayment = (payment: Payment) => {
     setPayments([payment, ...payments]);
   };
 
-  if (!isLoggedIn) {
+  if (!isLoggedIn || !user) {
     return <AuthPage onSignIn={signIn} onSignUp={signUp} />;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      {showUpdateProfile && (
-        <UpdateProfileModal
-          user={user}
-          onClose={() => setShowUpdateProfile(false)}
-          onSave={updateUser}
-        />
-      )}
-      {showChangePassword && (
-        <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
-      )}
-      <header className="bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 fixed top-0 left-0 right-0 z-50">
+      <header className="bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 sticky top-0 left-0 right-0 z-50">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <button
@@ -59,8 +42,6 @@ export default function Home() {
           </div>
           <ProfileDropdown
             user={user}
-            onUpdateProfile={() => setShowUpdateProfile(true)}
-            onChangePassword={() => setShowChangePassword(true)}
             onSignOut={signOut}
           />
         </div>
@@ -71,7 +52,7 @@ export default function Home() {
         onClose={() => setIsSidebarOpen(false)}
         onNavigate={setCurrentPage}
       />
-      <div className="lg:pl-64 pt-16">
+      <div className="lg:pl-64 pt-2">
         <main className="p-6 lg:p-8 min-h-[calc(100vh-4rem)]">
           {currentPage === "dashboard" && (
             <DashboardPage
