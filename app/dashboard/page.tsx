@@ -82,7 +82,7 @@ export default function Dashboard() {
           onClose={() => setIsSidebarOpen(false)}
           onNavigate={setCurrentPage}
         />
-        <div className="lg:pl-64 pt-2">
+        <div className="lg:pl-76 pt-2">
           <main className="p-6 lg:p-8 min-h-[calc(100vh-4rem)]">
             {currentPage === "dashboard" && (
               <DashboardPage

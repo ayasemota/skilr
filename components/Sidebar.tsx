@@ -27,7 +27,7 @@ export const Sidebar = ({
         onClick={onClose}
       />
       <aside
-        className={`fixed top-22 left-0 h-[calc(100dvh-5rem)] w-64 bg-gray-900/95 backdrop-blur-sm border-r border-gray-800 z-40 transform transition-transform duration-300 ${
+        className={`fixed top-22 left-0 h-[calc(100dvh-5rem)] w-76 bg-gray-900/95 backdrop-blur-sm border-r border-gray-800 z-40 transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 flex flex-col`}
       >
