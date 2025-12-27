@@ -39,7 +39,7 @@ export const ProfileDropdown = ({
           <p className="text-sm font-medium text-white">
             {user.firstName} {user.lastName}
           </p>
-          <p className="text-xs text-gray-400">Student</p>
+          <p className="text-xs text-gray-400">Unconfirmed</p>
         </div>
         <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
           {user.firstName[0]}

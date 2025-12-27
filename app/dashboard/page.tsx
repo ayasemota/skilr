@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { Payment } from "@/types";
+import { usePayments } from "@/hooks/usePayments";
 import { Sidebar } from "@/components/Sidebar";
 import { DashboardPage } from "@/components/DashboardPage";
 import { PaymentsPage } from "@/components/PaymentsPage";
@@ -17,10 +17,12 @@ import { Preloader } from "@/components/Preloader";
 
 export default function Dashboard() {
   const { isLoggedIn, user, signOut, loading } = useAuth();
+  const { payments, loading: paymentsLoading } = usePayments(
+    user?.email || null
+  );
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [payments, setPayments] = useState<Payment[]>([]);
   const [showUnavailableModal, setShowUnavailableModal] = useState(false);
   const [showPreloader, setShowPreloader] = useState(true);
 
@@ -37,10 +39,6 @@ export default function Dashboard() {
 
     return () => clearTimeout(timer);
   }, []);
-
-  const handleAddPayment = (payment: Payment) => {
-    setPayments([payment, ...payments]);
-  };
 
   const handleSignOut = () => {
     signOut();
@@ -88,14 +86,16 @@ export default function Dashboard() {
               <DashboardPage
                 user={user}
                 payments={payments}
+                paymentsLoading={paymentsLoading}
                 onNavigateToPayments={() => setCurrentPage("payments")}
+                onShowUnavailable={() => setShowUnavailableModal(true)}
               />
             )}
             {currentPage === "payments" && (
               <PaymentsPage
                 user={user}
                 payments={payments}
-                onAddPayment={handleAddPayment}
+                paymentsLoading={paymentsLoading}
               />
             )}
             {currentPage === "help" && <HelpPage />}

@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface User {
   firstName: string;
   lastName: string;
@@ -15,11 +17,13 @@ export interface SignUpForm {
 }
 
 export interface Payment {
-  id: number;
+  id: string | number;
   amount: number;
   date: string;
   status: string;
   reference?: string;
+  userEmail?: string;
+  createdAt?: Timestamp;
 }
 
 export interface PaymentStats {

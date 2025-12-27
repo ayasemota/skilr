@@ -3,11 +3,12 @@ import { User as UserIcon, Mail, Phone } from "lucide-react";
 import { User as UserType, Payment, PaystackResponse } from "@/types";
 import { PAYSTACK_PUBLIC_KEY, convertToKobo } from "@/lib/paystack";
 import { usePaystack } from "@/hooks/usePaystack";
+import { usePayments } from "@/hooks/usePayments";
 
 interface PaymentsPageProps {
   user: UserType;
   payments: Payment[];
-  onAddPayment: (payment: Payment) => void;
+  paymentsLoading: boolean;
 }
 
 const VAT_RATE = 4;
@@ -16,12 +17,14 @@ const TRANSACTION_FEE = Math.floor(Math.random() * (600 - 400 + 1)) + 300;
 export const PaymentsPage = ({
   user,
   payments,
-  onAddPayment,
+  paymentsLoading,
 }: PaymentsPageProps) => {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [isCheckout, setIsCheckout] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const { initializePayment } = usePaystack();
+  const { addPayment } = usePayments(user.email);
 
   const stats = useMemo(() => {
     const total = payments.reduce((sum, p) => sum + p.amount, 0);
@@ -39,6 +42,7 @@ export const PaymentsPage = ({
   };
 
   const handleConfirmPayment = () => {
+    setProcessing(true);
     const config = {
       email: user.email,
       amount: convertToKobo(total),
@@ -47,21 +51,27 @@ export const PaymentsPage = ({
       lastname: user.lastName,
       phone: user.phone,
       ref: `SKILR-${Date.now()}`,
-      onSuccess: (response: PaystackResponse) => {
-        const newPayment: Payment = {
-          id: Date.now(),
-          amount: baseAmount,
-          date: new Date().toISOString().split("T")[0],
-          status: "Completed",
-          reference: response.reference,
-        };
-        onAddPayment(newPayment);
-        setShowSuccess(true);
-        setIsCheckout(false);
-        setPaymentAmount("");
-        setTimeout(() => setShowSuccess(false), 3000);
+      onSuccess: async (response: PaystackResponse) => {
+        try {
+          const newPayment: Omit<Payment, "id"> = {
+            amount: baseAmount,
+            date: new Date().toISOString().split("T")[0],
+            status: "Completed",
+            reference: response.reference,
+          };
+          await addPayment(newPayment, user.email);
+          setShowSuccess(true);
+          setIsCheckout(false);
+          setPaymentAmount("");
+          setTimeout(() => setShowSuccess(false), 3000);
+        } catch (error) {
+          console.error("Error saving payment:", error);
+        } finally {
+          setProcessing(false);
+        }
       },
       onClose: () => {
+        setProcessing(false);
         console.log("Payment popup closed");
       },
     };
@@ -92,12 +102,6 @@ export const PaymentsPage = ({
           <p className="text-gray-400">
             Your payment has been processed successfully
           </p>
-          <button
-            onClick={() => setShowSuccess(false)}
-            className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
-          >
-            View Payments
-          </button>
         </div>
       </div>
     );
@@ -162,9 +166,10 @@ export const PaymentsPage = ({
           </div>
           <button
             onClick={handleConfirmPayment}
-            className="w-full py-3 bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg"
+            disabled={processing}
+            className="w-full py-3 bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg disabled:opacity-50"
           >
-            Pay
+            {processing ? "Processing..." : "Pay"}
           </button>
         </div>
       </div>
@@ -179,20 +184,26 @@ export const PaymentsPage = ({
             Total Amount Paid
           </h3>
           <p className="text-3xl font-bold text-white">
-            ₦{stats.total.toFixed(2)}
+            {paymentsLoading ? (
+              <span className="text-xl">Loading...</span>
+            ) : (
+              `₦${stats.total.toFixed(2)}`
+            )}
           </p>
         </div>
         <div className="bg-linear-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-2xl p-6">
           <h3 className="text-sm font-medium text-gray-400 mb-2">
             Uncleared Amount
           </h3>
-          <p className="text-3xl font-bold text-white">₦0.00</p>
+          <p className="text-3xl font-bold text-white">--</p>
         </div>
         <div className="bg-linear-to-br from-green-500/10 to-green-600/10 border border-green-500/20 rounded-2xl p-6">
           <h3 className="text-sm font-medium text-gray-400 mb-2">
             Total Transactions
           </h3>
-          <p className="text-3xl font-bold text-white">{payments.length}</p>
+          <p className="text-3xl font-bold text-white">
+            {paymentsLoading ? "..." : payments.length}
+          </p>
         </div>
       </div>
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8">
@@ -223,7 +234,12 @@ export const PaymentsPage = ({
       </div>
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8">
         <h2 className="text-2xl font-bold text-white mb-6">Payment History</h2>
-        {payments.length === 0 ? (
+        {paymentsLoading ? (
+          <div className="text-center py-8">
+            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-gray-400 text-sm mt-4">Loading payments...</p>
+          </div>
+        ) : payments.length === 0 ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-gray-700/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg

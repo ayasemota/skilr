@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Skilr - Learning Management System",
-  description: "Student dashboard and payment portal",
+  title: "Skilr - Management System",
+  description: "AY Asemota Skilr Management System",
 };
 
 export default function RootLayout({

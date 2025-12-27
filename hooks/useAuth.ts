@@ -15,6 +15,17 @@ export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const loadUserData = async (firebaseUser: FirebaseUser) => {
+    try {
+      const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+      if (userDoc.exists()) {
+        setUser(userDoc.data() as User);
+      }
+    } catch (error) {
+      console.error("Error loading user data:", error);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -29,17 +40,6 @@ export const useAuth = () => {
 
     return unsubscribe;
   }, []);
-
-  const loadUserData = async (firebaseUser: FirebaseUser) => {
-    try {
-      const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-      if (userDoc.exists()) {
-        setUser(userDoc.data() as User);
-      }
-    } catch (error) {
-      console.error("Error loading user data:", error);
-    }
-  };
 
   const signUp = async (form: SignUpForm) => {
     if (form.password !== form.confirmPassword) {
@@ -63,8 +63,10 @@ export const useAuth = () => {
       await setDoc(doc(db, "users", userCredential.user.uid), userData);
       setUser(userData);
       setIsLoggedIn(true);
-    } catch (error: any) {
-      throw new Error(error.message || "Sign up failed");
+    } catch (error) {
+      throw new Error(
+        error instanceof Error ? error.message : "Sign up failed"
+      );
     }
   };
 
@@ -77,19 +79,17 @@ export const useAuth = () => {
       );
       await loadUserData(userCredential.user);
       setIsLoggedIn(true);
-    } catch (error: any) {
-      throw new Error(error.message || "Sign in failed");
+    } catch (error) {
+      throw new Error(
+        error instanceof Error ? error.message : "Sign in failed"
+      );
     }
   };
 
   const signOut = async () => {
-    try {
-      await firebaseSignOut(auth);
-      setUser(null);
-      setIsLoggedIn(false);
-    } catch (error) {
-      console.error("Sign out error:", error);
-    }
+    await firebaseSignOut(auth);
+    setUser(null);
+    setIsLoggedIn(false);
   };
 
   return { isLoggedIn, user, loading, signUp, signIn, signOut };

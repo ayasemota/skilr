@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+* {
+  transition: all 0.3s ease-in-out;
+}
 a,
 button {
   cursor: pointer;

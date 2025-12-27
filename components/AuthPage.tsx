@@ -19,37 +19,25 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
     password: "",
     confirmPassword: "",
   });
-  const [signInForm, setSignInForm] = useState({
-    email: "",
-    password: "",
-  });
+  const [signInForm, setSignInForm] = useState({ email: "", password: "" });
 
-  const handleSignUp = async () => {
+  const handleSubmit = async (action: () => Promise<void>) => {
     setError("");
     setLoading(true);
     try {
-      await onSignUp(signUpForm);
-    } catch (err: any) {
-      setError(err.message);
+      await action();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSignIn = async () => {
-    setError("");
-    setLoading(true);
-    try {
-      await onSignIn(signInForm.email, signInForm.password);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const inputClass =
+    "w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-12">
           <div className="flex justify-center mb-4">
@@ -75,74 +63,51 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
           {isSignUp ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  value={signUpForm.firstName}
-                  onChange={(e) =>
-                    setSignUpForm({ ...signUpForm, firstName: e.target.value })
-                  }
-                  placeholder="First Name"
-                  className="px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                  required
-                />
-                <input
-                  type="text"
-                  value={signUpForm.lastName}
-                  onChange={(e) =>
-                    setSignUpForm({ ...signUpForm, lastName: e.target.value })
-                  }
-                  placeholder="Last Name"
-                  className="px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                  required
-                />
+                {["firstName", "lastName"].map((field, i) => (
+                  <input
+                    key={i}
+                    type="text"
+                    placeholder={
+                      field === "firstName" ? "First Name" : "Last Name"
+                    }
+                    value={signUpForm[field as keyof SignUpForm]}
+                    onChange={(e) =>
+                      setSignUpForm({ ...signUpForm, [field]: e.target.value })
+                    }
+                    className={inputClass}
+                    required
+                  />
+                ))}
               </div>
-              <input
-                type="email"
-                value={signUpForm.email}
-                onChange={(e) =>
-                  setSignUpForm({ ...signUpForm, email: e.target.value })
-                }
-                placeholder="Email"
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                required
-              />
-              <input
-                type="tel"
-                value={signUpForm.phone}
-                onChange={(e) =>
-                  setSignUpForm({ ...signUpForm, phone: e.target.value })
-                }
-                placeholder="+234 XXX XXX XXXX"
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                required
-              />
-              <input
-                type="password"
-                value={signUpForm.password}
-                onChange={(e) =>
-                  setSignUpForm({ ...signUpForm, password: e.target.value })
-                }
-                placeholder="Password"
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                required
-              />
-              <input
-                type="password"
-                value={signUpForm.confirmPassword}
-                onChange={(e) =>
-                  setSignUpForm({
-                    ...signUpForm,
-                    confirmPassword: e.target.value,
-                  })
-                }
-                placeholder="Confirm Password"
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                required
-              />
+              {["email", "phone", "password", "confirmPassword"].map(
+                (field, i) => (
+                  <input
+                    key={i}
+                    type={
+                      field.includes("password")
+                        ? "password"
+                        : field === "phone"
+                        ? "tel"
+                        : "email"
+                    }
+                    placeholder={
+                      field === "phone"
+                        ? "+234 XXX XXX XXXX"
+                        : field.charAt(0).toUpperCase() + field.slice(1)
+                    }
+                    value={signUpForm[field as keyof SignUpForm]}
+                    onChange={(e) =>
+                      setSignUpForm({ ...signUpForm, [field]: e.target.value })
+                    }
+                    className={inputClass}
+                    required
+                  />
+                )
+              )}
               <button
-                onClick={handleSignUp}
+                onClick={() => handleSubmit(() => onSignUp(signUpForm))}
                 disabled={loading}
-                className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 transition-all"
+                className="w-full py-3 bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 transition-all"
               >
                 {loading ? "Creating..." : "Create Account"}
               </button>
@@ -158,30 +123,27 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
             </div>
           ) : (
             <div className="space-y-6">
-              <input
-                type="email"
-                value={signInForm.email}
-                onChange={(e) =>
-                  setSignInForm({ ...signInForm, email: e.target.value })
-                }
-                placeholder="Email"
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                required
-              />
-              <input
-                type="password"
-                value={signInForm.password}
-                onChange={(e) =>
-                  setSignInForm({ ...signInForm, password: e.target.value })
-                }
-                placeholder="Password"
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                required
-              />
+              {["email", "password"].map((field, i) => (
+                <input
+                  key={i}
+                  type={field === "password" ? "password" : "email"}
+                  placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                  value={signInForm[field as keyof typeof signInForm]}
+                  onChange={(e) =>
+                    setSignInForm({ ...signInForm, [field]: e.target.value })
+                  }
+                  className={inputClass}
+                  required
+                />
+              ))}
               <button
-                onClick={handleSignIn}
+                onClick={() =>
+                  handleSubmit(() =>
+                    onSignIn(signInForm.email, signInForm.password)
+                  )
+                }
                 disabled={loading}
-                className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 transition-all"
+                className="w-full py-3 bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 transition-all"
               >
                 {loading ? "Signing In..." : "Sign In"}
               </button>
