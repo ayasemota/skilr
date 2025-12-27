@@ -1,5 +1,4 @@
 export interface User {
-  uid: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -21,4 +20,19 @@ export interface Payment {
   amount: number;
   date: string;
   status: string;
+  reference?: string;
+}
+
+export interface PaymentStats {
+  totalAmount: number;
+  weekAmount: number;
+}
+
+export interface PaystackResponse {
+  reference: string;
+  status: string;
+  trans: string;
+  transaction: string;
+  message: string;
+  trxref: string;
 }

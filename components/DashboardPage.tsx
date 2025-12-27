@@ -3,14 +3,12 @@ import { User, Payment } from "@/types";
 interface DashboardPageProps {
   user: User;
   payments: Payment[];
-  paymentsLoading: boolean;
   onNavigateToPayments: () => void;
 }
 
 export const DashboardPage = ({
   user,
   payments,
-  paymentsLoading,
   onNavigateToPayments,
 }: DashboardPageProps) => {
   const recentPayment = payments.length > 0 ? payments[0] : null;
@@ -74,11 +72,7 @@ export const DashboardPage = ({
               View All
             </button>
           </div>
-          {paymentsLoading ? (
-            <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 flex justify-center">
-              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : recentPayment ? (
+          {recentPayment ? (
             <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/30">
               <div className="flex justify-between items-start mb-2">
                 <div>

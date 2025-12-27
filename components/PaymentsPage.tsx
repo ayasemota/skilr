@@ -1,33 +1,27 @@
 import { useState, useMemo } from "react";
-import { User, Mail, Phone } from "lucide-react";
-import { User as UserType, Payment } from "@/types";
+import { User as UserIcon, Mail, Phone } from "lucide-react";
+import { User as UserType, Payment, PaystackResponse } from "@/types";
+import { PAYSTACK_PUBLIC_KEY, convertToKobo } from "@/lib/paystack";
+import { usePaystack } from "@/hooks/usePaystack";
 
 interface PaymentsPageProps {
   user: UserType;
   payments: Payment[];
-  loading: boolean;
-  onAddPayment: (
-    amount: number,
-    vatAmount: number,
-    transactionFee: number,
-    total: number
-  ) => Promise<void>;
+  onAddPayment: (payment: Payment) => void;
 }
 
 const VAT_RATE = 6;
-const TRANSACTION_FEE = 523;
+const TRANSACTION_FEE = 500;
 
 export const PaymentsPage = ({
   user,
   payments,
-  loading,
   onAddPayment,
 }: PaymentsPageProps) => {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [isCheckout, setIsCheckout] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState("");
+  const { initializePayment } = usePaystack();
 
   const stats = useMemo(() => {
     const total = payments.reduce((sum, p) => sum + p.amount, 0);
@@ -39,34 +33,45 @@ export const PaymentsPage = ({
     return { total, weekTotal };
   }, [payments]);
 
+  const baseAmount = paymentAmount ? parseFloat(paymentAmount) : 0;
+  const vat = baseAmount * (VAT_RATE / 100);
+  const total = baseAmount + vat + TRANSACTION_FEE;
+
   const handleContinue = () => {
-    setError("");
-    const amount = parseFloat(paymentAmount);
-    if (!paymentAmount || amount <= 0) {
-      setError("Please enter a valid amount");
-      return;
+    if (paymentAmount && parseFloat(paymentAmount) > 0) {
+      setIsCheckout(true);
     }
-    setIsCheckout(true);
   };
 
-  const handleConfirmPayment = async () => {
-    setProcessing(true);
-    setError("");
-    try {
-      const baseAmount = parseFloat(paymentAmount);
-      const vat = baseAmount * (VAT_RATE / 100);
-      const total = baseAmount + vat + TRANSACTION_FEE;
-      await onAddPayment(baseAmount, vat, TRANSACTION_FEE, total);
-      setShowSuccess(true);
-      setIsCheckout(false);
-      setPaymentAmount("");
-      setTimeout(() => setShowSuccess(false), 3000);
-    } catch (err) {
-      setError("Failed to process payment. Please try again.");
-      console.error("Payment error:", err);
-    } finally {
-      setProcessing(false);
-    }
+  const handleConfirmPayment = () => {
+    const config = {
+      email: user.email,
+      amount: convertToKobo(total),
+      publicKey: PAYSTACK_PUBLIC_KEY,
+      firstname: user.firstName,
+      lastname: user.lastName,
+      phone: user.phone,
+      ref: `SKILR-${Date.now()}`,
+      onSuccess: (response: PaystackResponse) => {
+        const newPayment: Payment = {
+          id: Date.now(),
+          amount: total,
+          date: new Date().toISOString().split("T")[0],
+          status: "Completed",
+          reference: response.reference,
+        };
+        onAddPayment(newPayment);
+        setShowSuccess(true);
+        setIsCheckout(false);
+        setPaymentAmount("");
+        setTimeout(() => setShowSuccess(false), 3000);
+      },
+      onClose: () => {
+        console.log("Payment popup closed");
+      },
+    };
+
+    initializePayment(config);
   };
 
   if (showSuccess) {
@@ -104,29 +109,16 @@ export const PaymentsPage = ({
   }
 
   if (isCheckout) {
-    const baseAmount = parseFloat(paymentAmount);
-    const vat = baseAmount * (VAT_RATE / 100);
-    const total = baseAmount + vat + TRANSACTION_FEE;
-
     return (
       <div className="max-w-md mx-auto">
         <button
-          onClick={() => {
-            setIsCheckout(false);
-            setError("");
-          }}
-          disabled={processing}
-          className="text-gray-400 hover:text-white mb-6 transition-colors duration-300 disabled:opacity-50"
+          onClick={() => setIsCheckout(false)}
+          className="text-gray-400 hover:text-white mb-6 transition-colors duration-300"
         >
           ← Back
         </button>
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 space-y-6">
           <h2 className="text-2xl font-bold text-white">Payment Summary</h2>
-          {error && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
-              {error}
-            </div>
-          )}
           <div className="space-y-4">
             <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700/30 space-y-2">
               <div className="flex justify-between text-gray-300">
@@ -149,7 +141,7 @@ export const PaymentsPage = ({
             </div>
             <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700/30">
               <div className="flex items-center gap-3 mb-3">
-                <User className="text-gray-400" size={18} />
+                <UserIcon className="text-gray-400" size={18} />
                 <div>
                   <p className="text-sm text-gray-500">Name</p>
                   <p className="text-white">
@@ -172,13 +164,18 @@ export const PaymentsPage = ({
                 </div>
               </div>
             </div>
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+              <p className="text-blue-400 text-sm">
+                <strong>Note:</strong> You will be redirected to Paystack to
+                complete your payment securely.
+              </p>
+            </div>
           </div>
           <button
             onClick={handleConfirmPayment}
-            disabled={processing}
-            className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg"
           >
-            {processing ? "Processing..." : "Confirm Payment"}
+            Pay with Paystack
           </button>
         </div>
       </div>
@@ -213,30 +210,24 @@ export const PaymentsPage = ({
       </div>
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8">
         <h2 className="text-2xl font-bold text-white mb-6">Make a Payment</h2>
-        {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
-            {error}
-          </div>
-        )}
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              {"Amount to Pay (₦)"}
+              Amount to Pay (₦)
             </label>
             <input
-              type="numeric"
+              type="number"
               value={paymentAmount}
-              onChange={(e) => {
-                setPaymentAmount(e.target.value);
-                setError("");
-              }}
+              onChange={(e) => setPaymentAmount(e.target.value)}
               placeholder="0.00"
+              min="100"
+              step="1000"
               className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors duration-300"
             />
           </div>
           <button
             onClick={handleContinue}
-            disabled={!paymentAmount || parseFloat(paymentAmount) <= 0}
+            disabled={!paymentAmount || parseFloat(paymentAmount) < 100}
             className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
             Continue
@@ -245,12 +236,7 @@ export const PaymentsPage = ({
       </div>
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8">
         <h2 className="text-2xl font-bold text-white mb-6">Payment History</h2>
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-            <p className="text-gray-400 text-sm">Loading payment history...</p>
-          </div>
-        ) : payments.length === 0 ? (
+        {payments.length === 0 ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-gray-700/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
@@ -284,6 +270,9 @@ export const PaymentsPage = ({
                     Amount
                   </th>
                   <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                    Reference
+                  </th>
+                  <th className="text-left py-3 px-4 text-gray-400 font-medium">
                     Status
                   </th>
                 </tr>
@@ -297,6 +286,9 @@ export const PaymentsPage = ({
                     <td className="py-4 px-4 text-gray-300">{payment.date}</td>
                     <td className="py-4 px-4 text-white font-medium">
                       ₦{payment.amount.toFixed(2)}
+                    </td>
+                    <td className="py-4 px-4 text-gray-400 text-xs">
+                      {payment.reference || "N/A"}
                     </td>
                     <td className="py-4 px-4">
                       <span className="px-3 py-1 bg-green-500/10 text-green-400 text-xs rounded-full border border-green-500/20">

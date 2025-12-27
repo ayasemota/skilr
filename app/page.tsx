@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { usePayments } from "@/hooks/usePayments";
+import { Payment } from "@/types";
 import { AuthPage } from "@/components/AuthPage";
 import { Sidebar } from "@/components/Sidebar";
 import { UpdateProfileModal } from "@/components/UpdateProfileModal";
@@ -16,35 +16,23 @@ import { Logo } from "@/components/Logo";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 
 export default function Home() {
-  const {
-    isLoggedIn,
-    user,
-    loading: authLoading,
-    signUp,
-    signIn,
-    signOut,
-    updateUser,
-  } = useAuth();
-  const { payments, loading: paymentsLoading, addPayment } = usePayments();
+  const { isLoggedIn, user, signUp, signIn, signOut, updateUser } = useAuth();
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUpdateProfile, setShowUpdateProfile] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [payments, setPayments] = useState<Payment[]>([
+    { id: 1, amount: 265000, date: "2024-12-20", status: "Completed" },
+    { id: 2, amount: 190800, date: "2024-11-15", status: "Completed" },
+  ]);
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading...</p>
-        </div>
-      </div>
-    );
+  const handleAddPayment = (payment: Payment) => {
+    setPayments([payment, ...payments]);
+  };
+
+  if (!isLoggedIn) {
+    return <AuthPage onSignIn={signIn} onSignUp={signUp} />;
   }
-
-  // if (!isLoggedIn) {
-  //   return <AuthPage onSignIn={signIn} onSignUp={signUp} />;
-  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -89,7 +77,6 @@ export default function Home() {
             <DashboardPage
               user={user}
               payments={payments}
-              paymentsLoading={paymentsLoading}
               onNavigateToPayments={() => setCurrentPage("payments")}
             />
           )}
@@ -97,8 +84,7 @@ export default function Home() {
             <PaymentsPage
               user={user}
               payments={payments}
-              loading={paymentsLoading}
-              onAddPayment={addPayment}
+              onAddPayment={handleAddPayment}
             />
           )}
           {currentPage === "help" && <HelpPage />}
