@@ -55,11 +55,16 @@ export const useAuth = () => {
   };
 
   const signUp = (form: SignUpForm) => {
+    if (form.password !== form.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
     const firstName = form.firstName || "John";
     const lastName = form.lastName || "Doe";
-    const email = form.email || `johndoe@domain.com`;
+    const email = form.email || "johndoe@domain.com";
     const phone = form.phone || "+234 800 000 0000";
-    const password = form.password || "johndoe123";
+    const password = form.password || "password123";
 
     const users = getStoredUsers();
 
@@ -68,13 +73,7 @@ export const useAuth = () => {
       return;
     }
 
-    const newUser: StoredUser = {
-      firstName,
-      lastName,
-      email,
-      phone,
-      password,
-    };
+    const newUser: StoredUser = { firstName, lastName, email, phone, password };
 
     users.push(newUser);
     saveStoredUsers(users);
@@ -90,9 +89,21 @@ export const useAuth = () => {
       const demoUser: User = {
         firstName: "John",
         lastName: "Doe",
-        email: `johndoe@domain.com`,
+        email: "johndoe@domain.com",
         phone: "+234 800 000 0000",
       };
+      const users = getStoredUsers();
+      const existingDemo = users.find((u) => u.email === demoUser.email);
+
+      if (!existingDemo) {
+        const demoUserWithPassword: StoredUser = {
+          ...demoUser,
+          password: "demo123",
+        };
+        users.push(demoUserWithPassword);
+        saveStoredUsers(users);
+      }
+
       setUser(demoUser);
       setIsLoggedIn(true);
       saveAuthState(true, demoUser.email);
@@ -128,19 +139,13 @@ export const useAuth = () => {
     const userIndex = users.findIndex((u) => u.email === user.email);
 
     if (userIndex !== -1) {
-      users[userIndex] = {
-        ...users[userIndex],
-        ...updatedUser,
-      };
+      users[userIndex] = { ...users[userIndex], ...updatedUser };
       saveStoredUsers(users);
       setUser(updatedUser);
     }
   };
 
-  const updatePassword = async (
-    currentPassword: string,
-    newPassword: string
-  ) => {
+  const updatePassword = (currentPassword: string, newPassword: string) => {
     if (!user) return;
 
     const users = getStoredUsers();
@@ -151,7 +156,7 @@ export const useAuth = () => {
       throw new Error("User not found");
     }
 
-    users[userIndex].password = newPassword || "demo123";
+    users[userIndex].password = newPassword || "password123";
     saveStoredUsers(users);
     alert("Password updated successfully!");
   };

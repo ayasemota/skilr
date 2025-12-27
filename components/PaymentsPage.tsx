@@ -184,11 +184,9 @@ export const PaymentsPage = ({
         </div>
         <div className="bg-linear-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-2xl p-6">
           <h3 className="text-sm font-medium text-gray-400 mb-2">
-            Unclared Amount
+            Uncleared Amount
           </h3>
-          <p className="text-3xl font-bold text-white">
-            ₦0
-          </p>
+          <p className="text-3xl font-bold text-white">₦0.00</p>
         </div>
         <div className="bg-linear-to-br from-green-500/10 to-green-600/10 border border-green-500/20 rounded-2xl p-6">
           <h3 className="text-sm font-medium text-gray-400 mb-2">

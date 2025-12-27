@@ -5,9 +5,14 @@ import { User as UserType } from "@/types";
 interface ProfileDropdownProps {
   user: UserType;
   onSignOut: () => void;
+  onShowUnavailable: () => void;
 }
 
-export const ProfileDropdown = ({ user, onSignOut }: ProfileDropdownProps) => {
+export const ProfileDropdown = ({
+  user,
+  onSignOut,
+  onShowUnavailable,
+}: ProfileDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -48,13 +53,25 @@ export const ProfileDropdown = ({ user, onSignOut }: ProfileDropdownProps) => {
         />
       </button>
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-2xl z-50">
+        <div className="absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-2xl z-50 animate-fade-in">
           <div className="p-2 space-y-1">
-            <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors duration-300">
+            <button
+              onClick={() => {
+                onShowUnavailable();
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors duration-300"
+            >
               <User size={18} />
               <span>Update Profile</span>
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors duration-300">
+            <button
+              onClick={() => {
+                onShowUnavailable();
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors duration-300"
+            >
               <Lock size={18} />
               <span>Change Password</span>
             </button>
