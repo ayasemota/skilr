@@ -27,11 +27,11 @@ export const Sidebar = ({
         onClick={onClose}
       />
       <aside
-        className={`fixed top-22 left-0 h-[calc(100vh-4rem)] w-64 bg-gray-900/95 backdrop-blur-sm border-r border-gray-800 z-40 transform transition-transform duration-300 ${
+        className={`fixed top-22 left-0 h-[calc(100dvh-5rem)] w-64 bg-gray-900/95 backdrop-blur-sm border-r border-gray-800 z-40 transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0`}
+        } lg:translate-x-0 flex flex-col`}
       >
-        <nav className="p-4 space-y-2">
+        <nav className="p-4 space-y-2 flex-1">
           <button
             onClick={() => handleNavigate("dashboard")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 ${
@@ -43,6 +43,7 @@ export const Sidebar = ({
             <Home size={20} />
             <span>Dashboard</span>
           </button>
+
           <button
             onClick={() => handleNavigate("payments")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 ${
@@ -54,6 +55,9 @@ export const Sidebar = ({
             <CreditCard size={20} />
             <span>Payments</span>
           </button>
+        </nav>
+
+        <div className="p-4 border-t border-gray-800">
           <button
             onClick={() => handleNavigate("help")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 ${
@@ -65,7 +69,7 @@ export const Sidebar = ({
             <HelpCircle size={20} />
             <span>Help & Support</span>
           </button>
-        </nav>
+        </div>
       </aside>
     </>
   );

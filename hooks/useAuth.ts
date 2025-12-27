@@ -55,11 +55,11 @@ export const useAuth = () => {
   };
 
   const signUp = (form: SignUpForm) => {
-    const firstName = form.firstName || "Demo";
-    const lastName = form.lastName || "User";
-    const email = form.email || `demo${Date.now()}@skilr.com`;
+    const firstName = form.firstName || "John";
+    const lastName = form.lastName || "Doe";
+    const email = form.email || `johndoe@domain.com`;
     const phone = form.phone || "+234 800 000 0000";
-    const password = form.password || "demo123";
+    const password = form.password || "johndoe123";
 
     const users = getStoredUsers();
 
@@ -88,9 +88,9 @@ export const useAuth = () => {
   const signIn = (email: string, password: string) => {
     if (!email && !password) {
       const demoUser: User = {
-        firstName: "Demo",
-        lastName: "Demooooo",
-        email: `demo@gmail.com`,
+        firstName: "John",
+        lastName: "Doe",
+        email: `johndoe@domain.com`,
         phone: "+234 800 000 0000",
       };
       setUser(demoUser);

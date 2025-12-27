@@ -28,7 +28,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-dvh bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
       <header className="bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 sticky top-0 left-0 right-0 z-50">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
@@ -40,10 +40,7 @@ export default function Home() {
             </button>
             <Logo />
           </div>
-          <ProfileDropdown
-            user={user}
-            onSignOut={signOut}
-          />
+          <ProfileDropdown user={user} onSignOut={signOut} />
         </div>
       </header>
       <Sidebar
