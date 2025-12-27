@@ -3,7 +3,6 @@ export interface User {
   lastName: string;
   email: string;
   phone: string;
-  emailVerified: boolean;
 }
 
 export interface SignUpForm {

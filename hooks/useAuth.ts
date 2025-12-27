@@ -1,4 +1,3 @@
-// hooks/useAuth.ts
 import { useState, useEffect } from "react";
 import { User, SignUpForm } from "@/types";
 
@@ -19,7 +18,6 @@ export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load auth state on mount
   useEffect(() => {
     const authState = localStorage.getItem(STORAGE_KEY);
     if (authState) {
@@ -57,7 +55,6 @@ export const useAuth = () => {
   };
 
   const signUp = (form: SignUpForm) => {
-    // Demo mode - use defaults for empty fields
     const firstName = form.firstName || "Demo";
     const lastName = form.lastName || "User";
     const email = form.email || `demo${Date.now()}@skilr.com`;
@@ -66,13 +63,11 @@ export const useAuth = () => {
 
     const users = getStoredUsers();
 
-    // Check if user already exists (only if email was provided)
     if (form.email && users.find((u) => u.email === email)) {
       alert("An account with this email already exists");
       return;
     }
 
-    // Create new user
     const newUser: StoredUser = {
       firstName,
       lastName,
@@ -84,7 +79,6 @@ export const useAuth = () => {
     users.push(newUser);
     saveStoredUsers(users);
 
-    // Log in the new user
     const { password: pwd, ...userWithoutPassword } = newUser;
     setUser(userWithoutPassword);
     setIsLoggedIn(true);
@@ -92,9 +86,7 @@ export const useAuth = () => {
   };
 
   const signIn = (email: string, password: string) => {
-    // Demo mode - allow empty credentials
     if (!email && !password) {
-      // Create a quick demo user
       const demoUser: User = {
         firstName: "Demo",
         lastName: "Demooooo",
@@ -151,7 +143,6 @@ export const useAuth = () => {
   ) => {
     if (!user) return;
 
-    // Demo mode - allow password changes without strict validation
     const users = getStoredUsers();
     const userIndex = users.findIndex((u) => u.email === user.email);
 
@@ -160,7 +151,6 @@ export const useAuth = () => {
       throw new Error("User not found");
     }
 
-    // Update password (simplified for demo)
     users[userIndex].password = newPassword || "demo123";
     saveStoredUsers(users);
     alert("Password updated successfully!");
