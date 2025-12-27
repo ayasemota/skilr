@@ -91,7 +91,6 @@ export default function Dashboard() {
                 onShowUnavailable={() => setShowUnavailableModal(true)}
               />
             )}
-
             {currentPage === "payments" && (
               <PaymentsPage
                 user={user}

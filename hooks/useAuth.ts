@@ -1,174 +1,96 @@
 import { useState, useEffect } from "react";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  User as FirebaseUser,
+} from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 import { User, SignUpForm } from "@/types";
-
-const STORAGE_KEY = "skilr_auth";
-const USERS_KEY = "skilr_users";
-
-interface StoredUser extends User {
-  password: string;
-}
-
-interface AuthState {
-  isLoggedIn: boolean;
-  currentUserId: string | null;
-}
 
 export const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const authState = localStorage.getItem(STORAGE_KEY);
-    if (authState) {
-      const { isLoggedIn: loggedIn, currentUserId } = JSON.parse(
-        authState
-      ) as AuthState;
-      if (loggedIn && currentUserId) {
-        const users = getStoredUsers();
-        const foundUser = users.find((u) => u.email === currentUserId);
-        if (foundUser) {
-          const { password, ...userWithoutPassword } = foundUser;
-          setUser(userWithoutPassword);
-          setIsLoggedIn(true);
-        }
+  const loadUserData = async (firebaseUser: FirebaseUser) => {
+    try {
+      const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+      if (userDoc.exists()) {
+        setUser(userDoc.data() as User);
       }
+    } catch (error) {
+      console.error("Error loading user data:", error);
     }
-    setLoading(false);
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        await loadUserData(firebaseUser);
+        setIsLoggedIn(true);
+      } else {
+        setUser(null);
+        setIsLoggedIn(false);
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
-  const getStoredUsers = (): StoredUser[] => {
-    const users = localStorage.getItem(USERS_KEY);
-    return users ? JSON.parse(users) : [];
-  };
-
-  const saveStoredUsers = (users: StoredUser[]) => {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  };
-
-  const saveAuthState = (loggedIn: boolean, userId: string | null) => {
-    const authState: AuthState = {
-      isLoggedIn: loggedIn,
-      currentUserId: userId,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(authState));
-  };
-
-  const signUp = (form: SignUpForm) => {
-    const firstName = form.firstName || "John";
-    const lastName = form.lastName || "Doe";
-    const email = form.email || `johndoe@domain.com`;
-    const phone = form.phone || "+234 800 000 0000";
-    const password = form.password || "johndoe123";
-
-    const users = getStoredUsers();
-
-    if (form.email && users.find((u) => u.email === email)) {
-      alert("An account with this email already exists");
-      return;
+  const signUp = async (form: SignUpForm) => {
+    if (form.password !== form.confirmPassword) {
+      throw new Error("Passwords do not match");
     }
 
-    const newUser: StoredUser = {
-      firstName,
-      lastName,
-      email,
-      phone,
-      password,
-    };
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        form.email,
+        form.password
+      );
 
-    users.push(newUser);
-    saveStoredUsers(users);
-
-    const { password: pwd, ...userWithoutPassword } = newUser;
-    setUser(userWithoutPassword);
-    setIsLoggedIn(true);
-    saveAuthState(true, newUser.email);
-  };
-
-  const signIn = (email: string, password: string) => {
-    if (!email && !password) {
-      const demoUser: User = {
-        firstName: "John",
-        lastName: "Doe",
-        email: `johndoe@domain.com`,
-        phone: "+234 800 000 0000",
+      const userData: User = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
       };
-      setUser(demoUser);
+
+      await setDoc(doc(db, "users", userCredential.user.uid), userData);
+      setUser(userData);
       setIsLoggedIn(true);
-      saveAuthState(true, demoUser.email);
-      return;
+    } catch (error) {
+      throw new Error(
+        error instanceof Error ? error.message : "Sign up failed"
+      );
     }
-
-    const users = getStoredUsers();
-    const foundUser = users.find(
-      (u) => u.email === email && u.password === password
-    );
-
-    if (!foundUser) {
-      alert("Invalid email or password");
-      return;
-    }
-
-    const { password: pwd, ...userWithoutPassword } = foundUser;
-    setUser(userWithoutPassword);
-    setIsLoggedIn(true);
-    saveAuthState(true, foundUser.email);
   };
 
-  const signOut = () => {
+  const signIn = async (email: string, password: string) => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      await loadUserData(userCredential.user);
+      setIsLoggedIn(true);
+    } catch (error) {
+      throw new Error(
+        error instanceof Error ? error.message : "Sign in failed"
+      );
+    }
+  };
+
+  const signOut = async () => {
+    await firebaseSignOut(auth);
     setUser(null);
     setIsLoggedIn(false);
-    saveAuthState(false, null);
   };
 
-  const updateUser = (updatedUser: User) => {
-    if (!user) return;
-
-    const users = getStoredUsers();
-    const userIndex = users.findIndex((u) => u.email === user.email);
-
-    if (userIndex !== -1) {
-      users[userIndex] = {
-        ...users[userIndex],
-        ...updatedUser,
-      };
-      saveStoredUsers(users);
-      setUser(updatedUser);
-    }
-  };
-
-  const updatePassword = async (
-    currentPassword: string,
-    newPassword: string
-  ) => {
-    if (!user) return;
-
-    const users = getStoredUsers();
-    const userIndex = users.findIndex((u) => u.email === user.email);
-
-    if (userIndex === -1) {
-      alert("User not found");
-      throw new Error("User not found");
-    }
-
-    users[userIndex].password = newPassword || "demo123";
-    saveStoredUsers(users);
-    alert("Password updated successfully!");
-  };
-
-  const getCurrentUserId = () => {
-    return user?.email || null;
-  };
-
-  return {
-    isLoggedIn,
-    user,
-    loading,
-    signUp,
-    signIn,
-    signOut,
-    updateUser,
-    updatePassword,
-    getCurrentUserId,
-  };
+  return { isLoggedIn, user, loading, signUp, signIn, signOut };
 };
