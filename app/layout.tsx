@@ -3,10 +3,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Skilr - Management System",
-  description: "AY Asemota Skilr Management System",
+  description: "AY Asemota Payment Management System",
   openGraph: {
     title: "Skilr - Management System",
-    description: "AY Asemota Skilr Management System",
+    description: "AY Asemota Payment Management System",
     siteName: "Kosa",
     images: [
       {
