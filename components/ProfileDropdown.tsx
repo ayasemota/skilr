@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, User, Lock, LogOut } from "lucide-react";
+import { ChevronDown, User, Lock, LogOut, Settings } from "lucide-react";
 import { User as UserType } from "@/types";
 
 interface ProfileDropdownProps {
@@ -74,6 +74,16 @@ export const ProfileDropdown = ({
             >
               <Lock size={18} />
               <span>Change Password</span>
+            </button>
+            <button
+              onClick={() => {
+                onShowUnavailable();
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors duration-300"
+            >
+              <Settings size={18} />
+              <span>Settings</span>
             </button>
             <div className="border-t border-gray-700 my-1"></div>
             <button

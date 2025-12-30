@@ -10,6 +10,13 @@ interface DashboardPageProps {
   upcomingEvents?: { title: string; description: string; date: string }[];
 }
 
+const formatCurrency = (amount: number) => {
+  return amount.toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 export const DashboardPage = ({
   user,
   payments,
@@ -22,18 +29,9 @@ export const DashboardPage = ({
   const recentPayments = payments.slice(0, 2);
 
   const quickLinks = [
-    {
-      label: "Make Payment",
-      onClick: onNavigateToPayments,
-    },
-    {
-      label: "Edit Profile",
-      onClick: onShowUnavailable,
-    },
-    {
-      label: "Settings",
-      onClick: onShowUnavailable,
-    },
+    { label: "Make Payment", onClick: onNavigateToPayments },
+    { label: "Edit Profile", onClick: onShowUnavailable },
+    { label: "Settings", onClick: onShowUnavailable },
   ];
 
   return (
@@ -44,7 +42,6 @@ export const DashboardPage = ({
         </h1>
         <p className="text-gray-400">{user.email}</p>
       </div>
-
       <div className="flex flex-wrap gap-6">
         <div className="flex-1 min-w-[18rem] bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
           <h2 className="text-xl font-semibold text-white mb-4">
@@ -69,7 +66,6 @@ export const DashboardPage = ({
             </div>
           )}
         </div>
-
         <div className="flex-1 min-w-[18rem] bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
           <h2 className="text-xl font-semibold text-white mb-4">
             Announcements
@@ -92,7 +88,6 @@ export const DashboardPage = ({
             </div>
           )}
         </div>
-
         <div className="flex-1 min-w-[18rem] bg-gray-800/50 border border-gray-700/50 rounded-2xl p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-white">
@@ -105,7 +100,6 @@ export const DashboardPage = ({
               View All
             </button>
           </div>
-
           {paymentsLoading ? (
             <div className="flex justify-center py-6">
               <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -118,7 +112,7 @@ export const DashboardPage = ({
                   className="p-3 bg-gray-900/50 rounded-lg border border-gray-700/30"
                 >
                   <p className="text-lg font-bold text-white">
-                    ₦{payment.amount.toFixed(2)}
+                    ₦{formatCurrency(payment.amount)}
                   </p>
                   <p className="text-xs text-gray-500">{payment.date}</p>
                 </div>
@@ -131,7 +125,6 @@ export const DashboardPage = ({
           )}
         </div>
       </div>
-
       <div className="mt-12">
         <h2 className="font-bold text-white text-3xl mb-6">Quick Links</h2>
         <div className="flex flex-wrap gap-4">
