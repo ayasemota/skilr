@@ -14,6 +14,13 @@ interface PaymentsPageProps {
 const VAT_RATE = 4;
 const TRANSACTION_FEE = Math.floor(Math.random() * (600 - 400 + 1)) + 300;
 
+const formatCurrency = (amount: number) => {
+  return amount.toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 export const PaymentsPage = ({
   user,
   payments,
@@ -75,7 +82,6 @@ export const PaymentsPage = ({
         console.log("Payment popup closed");
       },
     };
-
     initializePayment(config);
   };
 
@@ -122,20 +128,20 @@ export const PaymentsPage = ({
             <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700/30 space-y-2">
               <div className="flex justify-between text-gray-300">
                 <span>Base Amount</span>
-                <span>₦{baseAmount.toFixed(2)}</span>
+                <span>₦{formatCurrency(baseAmount)}</span>
               </div>
               <div className="flex justify-between text-gray-300">
                 <span>VAT ({VAT_RATE}%)</span>
-                <span>₦{vat.toFixed(2)}</span>
+                <span>₦{formatCurrency(vat)}</span>
               </div>
               <div className="flex justify-between text-gray-300">
                 <span>Transaction Fee</span>
-                <span>₦{TRANSACTION_FEE.toFixed(2)}</span>
+                <span>₦{formatCurrency(TRANSACTION_FEE)}</span>
               </div>
               <div className="border-t border-gray-700/50 pt-2 mt-2"></div>
               <div className="flex justify-between text-white font-bold text-lg">
                 <span>Total</span>
-                <span>₦{total.toFixed(2)}</span>
+                <span>₦{formatCurrency(total)}</span>
               </div>
             </div>
             <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700/30">
@@ -187,7 +193,7 @@ export const PaymentsPage = ({
             {paymentsLoading ? (
               <span className="text-xl">Loading...</span>
             ) : (
-              `₦${stats.total.toFixed(2)}`
+              `₦${formatCurrency(stats.total)}`
             )}
           </p>
         </div>
@@ -288,7 +294,7 @@ export const PaymentsPage = ({
                   >
                     <td className="py-4 px-4 text-gray-300">{payment.date}</td>
                     <td className="py-4 px-4 text-white font-medium">
-                      ₦{payment.amount.toFixed(2)}
+                      ₦{formatCurrency(payment.amount)}
                     </td>
                     <td className="py-4 px-4 text-gray-400 text-xs">
                       {payment.reference || "N/A"}

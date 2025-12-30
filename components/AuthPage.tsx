@@ -19,22 +19,38 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
     password: "",
     confirmPassword: "",
   });
-  const [signInForm, setSignInForm] = useState({ email: "", password: "" });
+  const [signInForm, setSignInForm] = useState({
+    email: "",
+    password: "",
+  });
 
-  const handleSubmit = async (action: () => Promise<void>) => {
+  const handleSignUp = async () => {
     setError("");
     setLoading(true);
     try {
-      await action();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      await onSignUp(signUpForm);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const inputClass =
-    "w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500";
+  const handleSignIn = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      await onSignIn(signInForm.email, signInForm.password);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
@@ -63,49 +79,105 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
           {isSignUp ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                {["firstName", "lastName"].map((field, i) => (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    First Name
+                  </label>
                   <input
-                    key={i}
                     type="text"
-                    placeholder={
-                      field === "firstName" ? "First Name" : "Last Name"
-                    }
-                    value={signUpForm[field as keyof SignUpForm]}
+                    value={signUpForm.firstName}
                     onChange={(e) =>
-                      setSignUpForm({ ...signUpForm, [field]: e.target.value })
+                      setSignUpForm({
+                        ...signUpForm,
+                        firstName: e.target.value,
+                      })
                     }
-                    className={inputClass}
+                    placeholder="First Name"
+                    className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
                     required
                   />
-                ))}
-              </div>
-              {["email", "phone", "password", "confirm Password"].map(
-                (field, i) => (
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Last Name
+                  </label>
                   <input
-                    key={i}
-                    type={
-                      field.includes("password")
-                        ? "password"
-                        : field === "phone"
-                        ? "tel"
-                        : "email"
-                    }
-                    placeholder={
-                      field === "phone"
-                        ? "Phone Number"
-                        : field.charAt(0).toUpperCase() + field.slice(1)
-                    }
-                    value={signUpForm[field as keyof SignUpForm]}
+                    type="text"
+                    value={signUpForm.lastName}
                     onChange={(e) =>
-                      setSignUpForm({ ...signUpForm, [field]: e.target.value })
+                      setSignUpForm({ ...signUpForm, lastName: e.target.value })
                     }
-                    className={inputClass}
+                    placeholder="Last Name"
+                    className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
                     required
                   />
-                )
-              )}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={signUpForm.email}
+                  onChange={(e) =>
+                    setSignUpForm({ ...signUpForm, email: e.target.value })
+                  }
+                  placeholder="Email"
+                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={signUpForm.phone}
+                  onChange={(e) =>
+                    setSignUpForm({ ...signUpForm, phone: e.target.value })
+                  }
+                  placeholder="Phone Number"
+                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={signUpForm.password}
+                  onChange={(e) =>
+                    setSignUpForm({ ...signUpForm, password: e.target.value })
+                  }
+                  placeholder="Password"
+                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={signUpForm.confirmPassword}
+                  onChange={(e) =>
+                    setSignUpForm({
+                      ...signUpForm,
+                      confirmPassword: e.target.value,
+                    })
+                  }
+                  placeholder="Confirm Password"
+                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  required
+                />
+              </div>
               <button
-                onClick={() => handleSubmit(() => onSignUp(signUpForm))}
+                onClick={handleSignUp}
                 disabled={loading}
                 className="w-full py-3 bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 transition-all"
               >
@@ -123,25 +195,38 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
             </div>
           ) : (
             <div className="space-y-6">
-              {["email", "password"].map((field, i) => (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Email
+                </label>
                 <input
-                  key={i}
-                  type={field === "password" ? "password" : "email"}
-                  placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-                  value={signInForm[field as keyof typeof signInForm]}
+                  type="email"
+                  value={signInForm.email}
                   onChange={(e) =>
-                    setSignInForm({ ...signInForm, [field]: e.target.value })
+                    setSignInForm({ ...signInForm, email: e.target.value })
                   }
-                  className={inputClass}
+                  placeholder="Email"
+                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
                   required
                 />
-              ))}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={signInForm.password}
+                  onChange={(e) =>
+                    setSignInForm({ ...signInForm, password: e.target.value })
+                  }
+                  placeholder="Password"
+                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  required
+                />
+              </div>
               <button
-                onClick={() =>
-                  handleSubmit(() =>
-                    onSignIn(signInForm.email, signInForm.password)
-                  )
-                }
+                onClick={handleSignIn}
                 disabled={loading}
                 className="w-full py-3 bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 transition-all"
               >
