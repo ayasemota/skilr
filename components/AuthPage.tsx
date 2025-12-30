@@ -79,7 +79,7 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
                   />
                 ))}
               </div>
-              {["email", "phone", "password", "confirmPassword"].map(
+              {["email", "phone", "password", "confirm Password"].map(
                 (field, i) => (
                   <input
                     key={i}
@@ -92,7 +92,7 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
                     }
                     placeholder={
                       field === "phone"
-                        ? "+234 XXX XXX XXXX"
+                        ? "Phone Number"
                         : field.charAt(0).toUpperCase() + field.slice(1)
                     }
                     value={signUpForm[field as keyof SignUpForm]}
