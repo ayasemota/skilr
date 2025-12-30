@@ -12,7 +12,7 @@ interface PaymentsPageProps {
 }
 
 const VAT_RATE = 4;
-const TRANSACTION_FEE = Math.floor(Math.random() * (600 - 400 + 1)) + 300;
+const TRANSACTION_FEE = Math.floor(Math.random() * (600 - 400)) + 300;
 
 const formatCurrency = (amount: number) => {
   return amount.toLocaleString("en-NG", {
@@ -32,6 +32,25 @@ export const PaymentsPage = ({
   const [processing, setProcessing] = useState(false);
   const { initializePayment } = usePaystack();
   const { addPayment } = usePayments(user.email);
+
+  const formatInputValue = (value: string): string => {
+    const numericValue = value.replace(/,/g, "");
+    if (!numericValue) return "";
+    const num = parseFloat(numericValue);
+    if (isNaN(num)) return "";
+    if (num > 1000000) return "1,000,000";
+    return num.toLocaleString("en-US", { maximumFractionDigits: 0 });
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/,/g, "");
+    if (rawValue === "" || /^\d+$/.test(rawValue)) {
+      const numValue = parseFloat(rawValue);
+      if (isNaN(numValue) || numValue <= 1000000) {
+        setPaymentAmount(rawValue);
+      }
+    }
+  };
 
   const stats = useMemo(() => {
     const total = payments.reduce((sum, p) => sum + p.amount, 0);
@@ -175,7 +194,7 @@ export const PaymentsPage = ({
             disabled={processing}
             className="w-full py-3 bg-linear-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg disabled:opacity-50"
           >
-            {processing ? "Processing..." : "Pay"}
+            {processing ? "Processing..." : `Pay ₦${formatCurrency(total)}`}
           </button>
         </div>
       </div>
@@ -220,12 +239,10 @@ export const PaymentsPage = ({
               Amount to Pay (₦)
             </label>
             <input
-              type="number"
-              value={paymentAmount}
-              onChange={(e) => setPaymentAmount(e.target.value)}
-              placeholder="0.00"
-              min="0"
-              step="1000"
+              type="text"
+              value={formatInputValue(paymentAmount)}
+              onChange={handleAmountChange}
+              placeholder="0"
               className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors duration-300"
             />
           </div>

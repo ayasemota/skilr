@@ -132,7 +132,7 @@ export const DashboardPage = ({
             <button
               key={index}
               onClick={link.onClick}
-              className="flex-1 min-w-48 py-6 rounded-xl font-semibold text-white bg-gray-800/60 border border-gray-700/50"
+              className="flex-1 min-w-48 py-6 rounded-xl font-semibold text-white bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 transform-fill transition-all duration-500"
             >
               {link.label}
             </button>

@@ -21,7 +21,12 @@ export default function Dashboard() {
     user?.email || null
   );
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState("dashboard");
+  const [currentPage, setCurrentPage] = useState(() => {
+    const hash = window.location.hash.slice(1);
+    return hash && ["dashboard", "payments", "help"].includes(hash)
+      ? hash
+      : "dashboard";
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUnavailableModal, setShowUnavailableModal] = useState(false);
   const [showPreloader, setShowPreloader] = useState(true);
@@ -36,9 +41,12 @@ export default function Dashboard() {
     const timer = setTimeout(() => {
       setShowPreloader(false);
     }, 2000);
-
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    window.location.hash = currentPage;
+  }, [currentPage]);
 
   const handleSignOut = () => {
     signOut();
