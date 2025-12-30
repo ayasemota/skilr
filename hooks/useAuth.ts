@@ -79,6 +79,7 @@ export const useAuth = () => {
       );
       await loadUserData(userCredential.user);
       setIsLoggedIn(true);
+      localStorage.setItem("loginTime", Date.now().toString());
     } catch (error) {
       throw new Error(
         error instanceof Error ? error.message : "Sign in failed"
@@ -90,6 +91,7 @@ export const useAuth = () => {
     await firebaseSignOut(auth);
     setUser(null);
     setIsLoggedIn(false);
+    localStorage.removeItem("loginTime");
   };
 
   return { isLoggedIn, user, loading, signUp, signIn, signOut };

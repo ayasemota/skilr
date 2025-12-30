@@ -33,6 +33,25 @@ export default function Dashboard() {
   }, [isLoggedIn, loading, router]);
 
   useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const checkSessionExpiry = () => {
+      const loginTime = localStorage.getItem("loginTime");
+      if (loginTime) {
+        const elapsed = Date.now() - parseInt(loginTime);
+        if (elapsed > 3600000) {
+          signOut();
+          router.push("/auth");
+        }
+      }
+    };
+
+    checkSessionExpiry();
+    const interval = setInterval(checkSessionExpiry, 60000);
+    return () => clearInterval(interval);
+  }, [isLoggedIn, signOut, router]);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setShowPreloader(false);
     }, 2000);
