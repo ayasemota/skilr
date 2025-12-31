@@ -21,15 +21,17 @@ export default function Dashboard() {
     user?.email || null
   );
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(() => {
-    const hash = window.location.hash.slice(1);
-    return hash && ["dashboard", "payments", "help"].includes(hash)
-      ? hash
-      : "dashboard";
-  });
+  const [currentPage, setCurrentPage] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUnavailableModal, setShowUnavailableModal] = useState(false);
   const [showPreloader, setShowPreloader] = useState(true);
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash && ["dashboard", "payments", "help"].includes(hash)) {
+      setCurrentPage(hash);
+    }
+  }, []);
 
   useEffect(() => {
     if (!loading && !isLoggedIn) {
