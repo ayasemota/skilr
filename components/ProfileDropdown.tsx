@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, User, Lock, LogOut, Settings } from "lucide-react";
+import { ChevronDown, User, LogOut, Settings } from "lucide-react";
 import { User as UserType } from "@/types";
 
 interface ProfileDropdownProps {
@@ -63,17 +63,7 @@ export const ProfileDropdown = ({
               className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors duration-300"
             >
               <User size={18} />
-              <span>Update Profile</span>
-            </button>
-            <button
-              onClick={() => {
-                onShowUnavailable();
-                setIsOpen(false);
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors duration-300"
-            >
-              <Lock size={18} />
-              <span>Change Password</span>
+              <span>View Profile</span>
             </button>
             <button
               onClick={() => {

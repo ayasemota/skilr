@@ -9,6 +9,7 @@ import {
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { User, SignUpForm } from "@/types";
+import { ErrorMessages } from "@/lib/errorMessages";
 
 export const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -43,7 +44,7 @@ export const useAuth = () => {
 
   const signUp = async (form: SignUpForm) => {
     if (form.password !== form.confirmPassword) {
-      throw new Error("Passwords do not match");
+      throw new Error("The passwords do not match. Please try again.");
     }
 
     try {
@@ -64,9 +65,7 @@ export const useAuth = () => {
       setUser(userData);
       setIsLoggedIn(true);
     } catch (error) {
-      throw new Error(
-        error instanceof Error ? error.message : "Sign up failed"
-      );
+      throw new Error(ErrorMessages(error));
     }
   };
 
@@ -79,10 +78,9 @@ export const useAuth = () => {
       );
       await loadUserData(userCredential.user);
       setIsLoggedIn(true);
+      localStorage.setItem("loginTime", Date.now().toString());
     } catch (error) {
-      throw new Error(
-        error instanceof Error ? error.message : "Sign in failed"
-      );
+      throw new Error(ErrorMessages(error));
     }
   };
 
@@ -90,6 +88,7 @@ export const useAuth = () => {
     await firebaseSignOut(auth);
     setUser(null);
     setIsLoggedIn(false);
+    localStorage.removeItem("loginTime");
   };
 
   return { isLoggedIn, user, loading, signUp, signIn, signOut };

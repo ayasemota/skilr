@@ -27,6 +27,13 @@ export default function Dashboard() {
   const [showPreloader, setShowPreloader] = useState(true);
 
   useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash && ["dashboard", "payments", "help"].includes(hash)) {
+      setCurrentPage(hash);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!loading && !isLoggedIn) {
       router.push("/auth");
     }
@@ -36,9 +43,12 @@ export default function Dashboard() {
     const timer = setTimeout(() => {
       setShowPreloader(false);
     }, 2000);
-
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    window.location.hash = currentPage;
+  }, [currentPage]);
 
   const handleSignOut = () => {
     signOut();
