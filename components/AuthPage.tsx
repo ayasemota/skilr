@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Logo } from "./Logo";
 import { SignUpForm } from "@/types";
 
@@ -23,6 +23,16 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleSignUp = async () => {
     setError("");
@@ -53,7 +63,7 @@ export const AuthPage = ({ onSignIn, onSignUp }: AuthPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-12">
           <div className="flex justify-center mb-4">
