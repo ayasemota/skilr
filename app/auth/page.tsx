@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { AuthPage } from "@/components/AuthPage";
+import { AuthPage } from "@/components/pages/AuthPage";
 import { Preloader } from "@/components/Preloader";
 
 export default function Auth() {

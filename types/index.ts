@@ -5,6 +5,7 @@ export interface User {
   lastName: string;
   email: string;
   phone: string;
+  status?: string;
 }
 
 export interface SignUpForm {
@@ -38,4 +39,24 @@ export interface PaystackResponse {
   transaction: string;
   message: string;
   trxref: string;
+}
+
+export interface Event {
+  id?: string;
+  title: string;
+  description: string;
+  eventDate: string;
+  eventTime: string;
+  isVisible: boolean;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
+
+export interface Announcement {
+  id?: string;
+  title: string;
+  description: string;
+  isVisible: boolean;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
 }

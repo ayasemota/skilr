@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { usePayments } from "@/hooks/usePayments";
+import { usePublicAnnouncements } from "@/hooks/usePublicAnnouncements";
+import { usePublicEvents } from "@/hooks/usePublicEvents";
 import { Sidebar } from "@/components/Sidebar";
-import { DashboardPage } from "@/components/DashboardPage";
-import { PaymentsPage } from "@/components/PaymentsPage";
-import { HelpPage } from "@/components/HelpPage";
+import { DashboardPage } from "@/components/pages/DashboardPage";
+import { PaymentsPage } from "@/components/pages/PaymentsPage";
+import { HelpPage } from "@/components/pages/HelpPage";
 import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Logo";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
@@ -20,7 +22,14 @@ export default function Dashboard() {
   const { payments, loading: paymentsLoading } = usePayments(
     user?.email || null
   );
+  const { announcements } = usePublicAnnouncements();
+  const { events } = usePublicEvents();
   const router = useRouter();
+
+  useEffect(() => {
+    console.log("Dashboard - Announcements:", announcements);
+    console.log("Dashboard - Events:", events);
+  }, [announcements, events]);
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUnavailableModal, setShowUnavailableModal] = useState(false);
@@ -99,6 +108,8 @@ export default function Dashboard() {
                 paymentsLoading={paymentsLoading}
                 onNavigateToPayments={() => setCurrentPage("payments")}
                 onShowUnavailable={() => setShowUnavailableModal(true)}
+                announcements={announcements}
+                upcomingEvents={events}
               />
             )}
             {currentPage === "payments" && (
