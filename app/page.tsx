@@ -18,7 +18,8 @@ import { UnavailableModal } from "@/components/UnavailableModal";
 import { Preloader } from "@/components/Preloader";
 
 export default function Dashboard() {
-  const { isLoggedIn, user, signOut, loading } = useAuth();
+  const { isLoggedIn, user, signOut, loading, updateUnclearedAmount } =
+    useAuth();
   const { payments, loading: paymentsLoading } = usePayments(
     user?.email || null
   );
@@ -126,6 +127,7 @@ export default function Dashboard() {
                 user={user}
                 payments={payments}
                 paymentsLoading={paymentsLoading}
+                updateUnclearedAmount={updateUnclearedAmount}
               />
             )}
             {currentPage === "help" && <HelpPage />}

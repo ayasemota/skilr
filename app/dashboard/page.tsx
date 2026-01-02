@@ -18,7 +18,8 @@ import { UnavailableModal } from "@/components/UnavailableModal";
 import { Preloader } from "@/components/Preloader";
 
 export default function Dashboard() {
-  const { isLoggedIn, user, signOut, loading } = useAuth();
+  const { isLoggedIn, user, signOut, loading, updateUnclearedAmount } =
+    useAuth();
   const { payments, loading: paymentsLoading } = usePayments(
     user?.email || null
   );
@@ -26,10 +27,7 @@ export default function Dashboard() {
   const { events } = usePublicEvents();
   const router = useRouter();
 
-  useEffect(() => {
-    console.log("Dashboard - Announcements:", announcements);
-    console.log("Dashboard - Events:", events);
-  }, [announcements, events]);
+  useEffect(() => {}, [announcements, events]);
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUnavailableModal, setShowUnavailableModal] = useState(false);
@@ -117,6 +115,7 @@ export default function Dashboard() {
                 user={user}
                 payments={payments}
                 paymentsLoading={paymentsLoading}
+                updateUnclearedAmount={updateUnclearedAmount}
               />
             )}
             {currentPage === "help" && <HelpPage />}

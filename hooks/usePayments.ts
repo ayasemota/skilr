@@ -6,6 +6,8 @@ import {
   where,
   onSnapshot,
   Timestamp,
+  doc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Payment } from "@/types";
@@ -60,15 +62,30 @@ export const usePayments = (userEmail: string | null) => {
 
   const addPayment = async (payment: Omit<Payment, "id">, email: string) => {
     try {
-      await addDoc(collection(db, "payments"), {
+      const docRef = await addDoc(collection(db, "payments"), {
         ...payment,
         userEmail: email,
         createdAt: Timestamp.now(),
       });
+      return docRef.id;
     } catch (error) {
       throw error instanceof Error ? error : new Error("Failed to add payment");
     }
   };
 
-  return { payments, loading, error, addPayment };
+  const updatePayment = async (
+    paymentId: string,
+    updates: Partial<Omit<Payment, "id">>
+  ) => {
+    try {
+      const paymentRef = doc(db, "payments", paymentId);
+      await updateDoc(paymentRef, updates);
+    } catch (error) {
+      throw error instanceof Error
+        ? error
+        : new Error("Failed to update payment");
+    }
+  };
+
+  return { payments, loading, error, addPayment, updatePayment };
 };

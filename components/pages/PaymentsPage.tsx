@@ -9,6 +9,7 @@ interface PaymentsPageProps {
   user: UserType;
   payments: Payment[];
   paymentsLoading: boolean;
+  updateUnclearedAmount?: (email: string, amount: number) => Promise<void>;
 }
 
 const VAT_RATE = 4;
@@ -21,17 +22,42 @@ const formatCurrency = (amount: number) => {
   });
 };
 
+const getPaymentDateTime = (payment: Payment) => {
+  if (
+    payment.createdAt &&
+    typeof payment.createdAt === "object" &&
+    "seconds" in payment.createdAt
+  ) {
+    const date = new Date(payment.createdAt.seconds * 1000);
+    const dateStr = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    const timeStr = date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${dateStr} at ${timeStr}`;
+  }
+  return payment.date || "N/A";
+};
+
 export const PaymentsPage = ({
   user,
   payments,
   paymentsLoading,
+  updateUnclearedAmount,
 }: PaymentsPageProps) => {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [isCheckout, setIsCheckout] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showFailed, setShowFailed] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
   const { initializePayment } = usePaystack();
-  const { addPayment } = usePayments(user.email);
+  const { addPayment, updatePayment } = usePayments(user.email);
 
   const formatInputValue = (value: string): string => {
     const numericValue = value.replace(/,/g, "");
@@ -53,7 +79,9 @@ export const PaymentsPage = ({
   };
 
   const stats = useMemo(() => {
-    const total = payments.reduce((sum, p) => sum + p.amount, 0);
+    const total = payments
+      .filter((p) => p.status === "Completed")
+      .reduce((sum, p) => sum + p.amount, 0);
     return { total };
   }, [payments]);
 
@@ -67,41 +95,75 @@ export const PaymentsPage = ({
     }
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     setProcessing(true);
-    const config = {
-      email: user.email,
-      amount: convertToKobo(total),
-      publicKey: PAYSTACK_PUBLIC_KEY,
-      firstname: user.firstName,
-      lastname: user.lastName,
-      phone: user.phone,
-      ref: `SKILR-${Date.now()}`,
-      onSuccess: async (response: PaystackResponse) => {
-        try {
-          const newPayment: Omit<Payment, "id"> = {
-            amount: baseAmount,
-            date: new Date().toISOString().split("T")[0],
-            status: "Completed",
-            reference: response.reference,
-          };
-          await addPayment(newPayment, user.email);
-          setShowSuccess(true);
-          setIsCheckout(false);
-          setPaymentAmount("");
-          setTimeout(() => setShowSuccess(false), 3000);
-        } catch (error) {
-          console.error("Error saving payment:", error);
-        } finally {
-          setProcessing(false);
-        }
-      },
-      onClose: () => {
-        setProcessing(false);
-        console.log("Payment popup closed");
-      },
-    };
-    initializePayment(config);
+    const transactionRef = `SKILR-${Date.now()}`;
+
+    try {
+      const pendingPayment: Omit<Payment, "id"> = {
+        amount: baseAmount,
+        date: new Date().toISOString().split("T")[0],
+        status: "Pending",
+        reference: transactionRef,
+      };
+      const paymentDocId = await addPayment(pendingPayment, user.email);
+      setPendingPaymentId(paymentDocId);
+
+      const config = {
+        email: user.email,
+        amount: convertToKobo(total),
+        publicKey: PAYSTACK_PUBLIC_KEY,
+        firstname: user.firstName,
+        lastname: user.lastName,
+        phone: user.phone,
+        ref: transactionRef,
+        onSuccess: async (response: PaystackResponse) => {
+          try {
+            if (paymentDocId) {
+              await updatePayment(paymentDocId, {
+                status: "Completed",
+                reference: response.reference,
+              });
+            }
+
+            if (updateUnclearedAmount) {
+              await updateUnclearedAmount(user.email, baseAmount);
+            }
+
+            setShowSuccess(true);
+            setIsCheckout(false);
+            setPaymentAmount("");
+            setPendingPaymentId(null);
+            setTimeout(() => setShowSuccess(false), 3000);
+          } catch (error) {
+            console.error("Error updating payment:", error);
+          } finally {
+            setProcessing(false);
+          }
+        },
+        onClose: async () => {
+          try {
+            if (paymentDocId) {
+              await updatePayment(paymentDocId, {
+                status: "Failed",
+              });
+            }
+            setShowFailed(true);
+            setTimeout(() => setShowFailed(false), 3000);
+          } catch (error) {
+            console.error("Error updating failed payment:", error);
+          } finally {
+            setProcessing(false);
+            setIsCheckout(false);
+            setPendingPaymentId(null);
+          }
+        },
+      };
+      initializePayment(config);
+    } catch (error) {
+      console.error("Error saving pending payment:", error);
+      setProcessing(false);
+    }
   };
 
   if (showSuccess) {
@@ -126,6 +188,34 @@ export const PaymentsPage = ({
           <h2 className="text-2xl font-bold text-white">Payment Successful!</h2>
           <p className="text-gray-400">
             Your payment has been processed successfully
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (showFailed) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto border border-red-500/20">
+            <svg
+              className="w-10 h-10 text-red-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-white">Payment Failed</h2>
+          <p className="text-gray-400">
+            Your payment was not completed. Please try again.
           </p>
         </div>
       </div>
@@ -220,7 +310,9 @@ export const PaymentsPage = ({
           <h3 className="text-sm font-medium text-gray-400 mb-2">
             Uncleared Amount
           </h3>
-          <p className="text-3xl font-bold text-white">--</p>
+          <p className="text-3xl font-bold text-white">
+            ₦{formatCurrency(user.unclearedAmount || 0)}
+          </p>
         </div>
         <div className="bg-linear-to-br from-green-500/10 to-green-600/10 border border-green-500/20 rounded-2xl p-6">
           <h3 className="text-sm font-medium text-gray-400 mb-2">
@@ -309,7 +401,9 @@ export const PaymentsPage = ({
                     key={payment.id}
                     className="border-b border-gray-700/10 hover:bg-gray-700/10 transition-colors duration-300"
                   >
-                    <td className="py-4 px-4 text-gray-300">{payment.date}</td>
+                    <td className="py-4 px-4 text-gray-300">
+                      {getPaymentDateTime(payment)}
+                    </td>
                     <td className="py-4 px-4 text-white font-medium">
                       ₦{formatCurrency(payment.amount)}
                     </td>
@@ -317,7 +411,17 @@ export const PaymentsPage = ({
                       {payment.reference || "N/A"}
                     </td>
                     <td className="py-4 px-4">
-                      <span className="px-3 py-1 bg-green-500/10 text-green-400 text-xs rounded-full border border-green-500/20">
+                      <span
+                        className={`px-3 py-1 text-xs rounded-full border ${
+                          payment.status === "Completed"
+                            ? "bg-green-500/10 text-green-400 border-green-500/20"
+                            : payment.status === "Pending"
+                            ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                            : payment.status === "Failed"
+                            ? "bg-red-500/10 text-red-400 border-red-500/20"
+                            : "bg-gray-500/10 text-gray-400 border-gray-500/20"
+                        }`}
+                      >
                         {payment.status}
                       </span>
                     </td>

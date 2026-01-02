@@ -42,7 +42,6 @@ export const usePublicEvents = () => {
           })
           .filter((event) => event.isVisible);
 
-        console.log("Fetched events:", eventsData);
         setEvents(eventsData);
         setLoading(false);
       },

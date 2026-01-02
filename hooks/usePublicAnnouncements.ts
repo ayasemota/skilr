@@ -35,7 +35,6 @@ export const usePublicAnnouncements = () => {
           .filter((announcement) => announcement.isVisible)
           .slice(0, 10);
 
-        console.log("Fetched announcements:", announcementsData);
         setAnnouncements(announcementsData);
         setLoading(false);
       },
