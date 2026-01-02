@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { usePayments } from "@/hooks/usePayments";
+import { usePublicEvents } from "@/hooks/usePublicEvents";
+import { usePublicAnnouncements } from "@/hooks/usePublicAnnouncements";
 import { Sidebar } from "@/components/Sidebar";
-import { DashboardPage } from "@/components/DashboardPage";
-import { PaymentsPage } from "@/components/PaymentsPage";
-import { HelpPage } from "@/components/HelpPage";
+import { DashboardPage } from "@/components/pages/DashboardPage";
+import { PaymentsPage } from "@/components/pages/PaymentsPage";
+import { HelpPage } from "@/components/pages/HelpPage";
 import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Logo";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
@@ -16,10 +18,14 @@ import { UnavailableModal } from "@/components/UnavailableModal";
 import { Preloader } from "@/components/Preloader";
 
 export default function Dashboard() {
-  const { isLoggedIn, user, signOut, loading } = useAuth();
+  const { isLoggedIn, user, signOut, loading, updateUnclearedAmount } =
+    useAuth();
   const { payments, loading: paymentsLoading } = usePayments(
     user?.email || null
   );
+  const { events, loading: eventsLoading } = usePublicEvents();
+  const { announcements, loading: announcementsLoading } =
+    usePublicAnnouncements();
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -100,7 +106,7 @@ export default function Dashboard() {
           onNavigate={setCurrentPage}
         />
         <div className="lg:pl-76 pt-2">
-          <main className="p-6 lg:p-8 min-h-[calc(100vh-4rem)]">
+          <main className="p-6 lg:p-8 min-h-[calc(100dvh-4rem)]">
             {currentPage === "dashboard" && (
               <DashboardPage
                 user={user}
@@ -108,6 +114,11 @@ export default function Dashboard() {
                 paymentsLoading={paymentsLoading}
                 onNavigateToPayments={() => setCurrentPage("payments")}
                 onShowUnavailable={() => setShowUnavailableModal(true)}
+                upcomingEvents={events.filter(
+                  (event): event is typeof event & { date: string } =>
+                    event.date !== undefined
+                )}
+                announcements={announcements}
               />
             )}
 
@@ -116,6 +127,7 @@ export default function Dashboard() {
                 user={user}
                 payments={payments}
                 paymentsLoading={paymentsLoading}
+                updateUnclearedAmount={updateUnclearedAmount}
               />
             )}
             {currentPage === "help" && <HelpPage />}

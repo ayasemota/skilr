@@ -23,7 +23,6 @@ export const ErrorMessages = (error: unknown): string => {
     "auth/operation-not-allowed":
       "Account creation is currently disabled. Please contact support.",
 
-    // Network errors
     "auth/network-request-failed":
       "Network error. Please check your internet connection and try again.",
     "auth/too-many-requests":

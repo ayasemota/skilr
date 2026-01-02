@@ -6,7 +6,7 @@ import {
   onAuthStateChanged,
   User as FirebaseUser,
 } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { User, SignUpForm } from "@/types";
 import { ErrorMessages } from "@/lib/errorMessages";
@@ -91,5 +91,43 @@ export const useAuth = () => {
     localStorage.removeItem("loginTime");
   };
 
-  return { isLoggedIn, user, loading, signUp, signIn, signOut };
+  const updateUnclearedAmount = async (
+    email: string,
+    amountToReduce: number
+  ) => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error("No user logged in");
+
+      const userRef = doc(db, "users", currentUser.uid);
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const currentUncleared = userData.unclearedAmount || 0;
+        const newUncleared = Math.max(0, currentUncleared - amountToReduce);
+
+        await updateDoc(userRef, {
+          unclearedAmount: newUncleared,
+        });
+
+        if (user) {
+          setUser({ ...user, unclearedAmount: newUncleared });
+        }
+      }
+    } catch (error) {
+      console.error("Error updating uncleared amount:", error);
+      throw error;
+    }
+  };
+
+  return {
+    isLoggedIn,
+    user,
+    loading,
+    signUp,
+    signIn,
+    signOut,
+    updateUnclearedAmount,
+  };
 };
