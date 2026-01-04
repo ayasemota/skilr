@@ -24,6 +24,28 @@ const formatCurrency = (amount: number) => {
   });
 };
 
+const getPaymentDateTime = (payment: Payment) => {
+  if (
+    payment.createdAt &&
+    typeof payment.createdAt === "object" &&
+    "seconds" in payment.createdAt
+  ) {
+    const date = new Date(payment.createdAt.seconds * 1000);
+    const dateStr = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    const timeStr = date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${dateStr} at ${timeStr}`;
+  }
+  return payment.paymentDate || payment.date || "N/A";
+};
+
 const Modal = ({
   isOpen,
   onClose,
@@ -207,7 +229,7 @@ export const DashboardPage = ({
                     <p className="text-lg font-bold text-white">
                       ₦{formatCurrency(payment.amount)}
                     </p>
-                    <p className="text-xs text-gray-500">{payment.date}</p>
+                    <p className="text-xs text-gray-500">{getPaymentDateTime(payment)}</p>
                   </div>
                 ))}
               </div>

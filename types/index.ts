@@ -22,10 +22,12 @@ export interface Payment {
   id: string | number;
   amount: number;
   date: string;
+  paymentDate: string;
+  paymentTime: string;
   status: string;
-  reference?: string;
-  userEmail?: string;
-  createdAt?: Timestamp;
+  reference: string;
+  userEmail: string;
+  createdAt: Timestamp;
 }
 
 export interface PaymentStats {
