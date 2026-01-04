@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { User as UserIcon, Mail, Phone } from "lucide-react";
+import { Timestamp } from "firebase/firestore";
 import { User as UserType, Payment, PaystackResponse } from "@/types";
 import { PAYSTACK_PUBLIC_KEY, convertToKobo } from "@/lib/paystack";
 import { usePaystack } from "@/hooks/usePaystack";
@@ -100,11 +101,19 @@ export const PaymentsPage = ({
     const transactionRef = `SKILR-${Date.now()}`;
 
     try {
+      const now = new Date();
+      const paymentDate = now.toISOString().split("T")[0];
+      const paymentTime = now.toTimeString().slice(0, 5);
+
       const pendingPayment: Omit<Payment, "id"> = {
         amount: baseAmount,
-        date: new Date().toISOString().split("T")[0],
+        date: new Date(now.getTime() - 86400000).toISOString().split("T")[0], // Previous day for 'date'
+        paymentDate: paymentDate,
+        paymentTime: paymentTime,
         status: "Pending",
         reference: transactionRef,
+        userEmail: user.email,
+        createdAt: Timestamp.now(),
       };
       const paymentDocId = await addPayment(pendingPayment, user.email);
       setPendingPaymentId(paymentDocId);
