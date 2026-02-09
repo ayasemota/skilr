@@ -4,9 +4,11 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
+  confirmPasswordReset,
   User as FirebaseUser,
 } from "firebase/auth";
-import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { User, SignUpForm } from "@/types";
 import { ErrorMessages } from "@/lib/errorMessages";
@@ -16,30 +18,43 @@ export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadUserData = async (firebaseUser: FirebaseUser) => {
-    try {
-      const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-      if (userDoc.exists()) {
-        setUser(userDoc.data() as User);
-      }
-    } catch (error) {
-      console.error("Error loading user data:", error);
-    }
-  };
-
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    let unsubscribeUserDoc: (() => void) | null = null;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      if (unsubscribeUserDoc) {
+        unsubscribeUserDoc();
+        unsubscribeUserDoc = null;
+      }
+
       if (firebaseUser) {
-        await loadUserData(firebaseUser);
-        setIsLoggedIn(true);
+        unsubscribeUserDoc = onSnapshot(
+          doc(db, "users", firebaseUser.uid),
+          (docSnapshot) => {
+            if (docSnapshot.exists()) {
+              setUser(docSnapshot.data() as User);
+            }
+            setIsLoggedIn(true);
+            setLoading(false);
+          },
+          (error) => {
+            console.error("Error listening to user data:", error);
+            setLoading(false);
+          },
+        );
       } else {
         setUser(null);
         setIsLoggedIn(false);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeUserDoc) {
+        unsubscribeUserDoc();
+      }
+    };
   }, []);
 
   const signUp = async (form: SignUpForm) => {
@@ -51,7 +66,7 @@ export const useAuth = () => {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         form.email,
-        form.password
+        form.password,
       );
 
       const userData: User = {
@@ -59,6 +74,7 @@ export const useAuth = () => {
         lastName: form.lastName,
         email: form.email,
         phone: form.phone,
+        status: "Unconfirmed",
       };
 
       await setDoc(doc(db, "users", userCredential.user.uid), userData);
@@ -71,13 +87,7 @@ export const useAuth = () => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      await loadUserData(userCredential.user);
-      setIsLoggedIn(true);
+      await signInWithEmailAndPassword(auth, email, password);
       localStorage.setItem("loginTime", Date.now().toString());
     } catch (error) {
       throw new Error(ErrorMessages(error));
@@ -91,9 +101,25 @@ export const useAuth = () => {
     localStorage.removeItem("loginTime");
   };
 
+  const forgotPassword = async (email: string) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      throw new Error(ErrorMessages(error));
+    }
+  };
+
+  const resetPassword = async (oobCode: string, newPassword: string) => {
+    try {
+      await confirmPasswordReset(auth, oobCode, newPassword);
+    } catch (error) {
+      throw new Error(ErrorMessages(error));
+    }
+  };
+
   const updateUnclearedAmount = async (
     email: string,
-    amountToReduce: number
+    amountToReduce: number,
   ) => {
     try {
       const currentUser = auth.currentUser;
@@ -128,6 +154,8 @@ export const useAuth = () => {
     signUp,
     signIn,
     signOut,
+    forgotPassword,
+    resetPassword,
     updateUnclearedAmount,
   };
 };
