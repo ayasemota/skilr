@@ -7,7 +7,7 @@ import { AuthPage } from "@/components/pages/AuthPage";
 import { Preloader } from "@/components/Preloader";
 
 export default function Auth() {
-  const { isLoggedIn, signUp, signIn, loading } = useAuth();
+  const { isLoggedIn, signUp, signIn, forgotPassword, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -20,5 +20,11 @@ export default function Auth() {
     return <Preloader />;
   }
 
-  return <AuthPage onSignIn={signIn} onSignUp={signUp} />;
+  return (
+    <AuthPage
+      onSignIn={signIn}
+      onSignUp={signUp}
+      onForgotPassword={forgotPassword}
+    />
+  );
 }

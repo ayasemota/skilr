@@ -15,13 +15,14 @@ import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Logo";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { UnavailableModal } from "@/components/UnavailableModal";
+import { PendingApprovalOverlay } from "@/components/PendingApprovalOverlay";
 import { Preloader } from "@/components/Preloader";
 
 export default function Dashboard() {
   const { isLoggedIn, user, signOut, loading, updateUnclearedAmount } =
     useAuth();
   const { payments, loading: paymentsLoading } = usePayments(
-    user?.email || null
+    user?.email || null,
   );
   const { announcements } = usePublicAnnouncements();
   const { events } = usePublicEvents();
@@ -127,6 +128,7 @@ export default function Dashboard() {
         isOpen={showUnavailableModal}
         onClose={() => setShowUnavailableModal(false)}
       />
+      {!user.status && <PendingApprovalOverlay onSignOut={handleSignOut} />}
     </>
   );
 }

@@ -23,6 +23,11 @@ export const ErrorMessages = (error: unknown): string => {
     "auth/operation-not-allowed":
       "Account creation is currently disabled. Please contact support.",
 
+    "auth/expired-action-code":
+      "This reset link has expired. Please request a new one.",
+    "auth/invalid-action-code":
+      "This reset link is invalid or has already been used. Please request a new one.",
+
     "auth/network-request-failed":
       "Network error. Please check your internet connection and try again.",
     "auth/too-many-requests":
