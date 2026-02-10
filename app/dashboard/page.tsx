@@ -11,11 +11,11 @@ import { Sidebar } from "@/components/Sidebar";
 import { DashboardPage } from "@/components/pages/DashboardPage";
 import { PaymentsPage } from "@/components/pages/PaymentsPage";
 import { HelpPage } from "@/components/pages/HelpPage";
-import { ProfilePage } from "@/components/pages/ProfilePage";
+import { SettingsPage } from "@/components/pages/SettingsPage";
 import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Logo";
-import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { UnavailableModal } from "@/components/UnavailableModal";
+import { LogoutModal } from "@/components/LogoutModal";
 import { PendingApprovalOverlay } from "@/components/PendingApprovalOverlay";
 import { Preloader } from "@/components/Preloader";
 
@@ -39,12 +39,13 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUnavailableModal, setShowUnavailableModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showPreloader, setShowPreloader] = useState(true);
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
-    if (hash && ["dashboard", "payments", "help", "profile"].includes(hash)) {
-      setCurrentPage(hash);
+    if (hash && ["dashboard", "payments", "help", "settings"].includes(hash)) {
+      setTimeout(() => setCurrentPage(hash), 0);
     }
   }, []);
 
@@ -82,7 +83,7 @@ export default function Dashboard() {
     <>
       <div className="min-h-dvh bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
         <header className="bg-gray-900/50 backdrop-blur-sm border-b border-gray-800 sticky top-0 left-0 right-0 z-50">
-          <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center justify-between px-6 py-6">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -92,12 +93,18 @@ export default function Dashboard() {
               </button>
               <Logo />
             </div>
-            <ProfileDropdown
-              user={user}
-              onSignOut={handleSignOut}
-              onShowUnavailable={() => setShowUnavailableModal(true)}
-              onNavigateToProfile={() => setCurrentPage("profile")}
-            />
+            <div className="flex items-center gap-3">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-medium text-white">
+                  {user.firstName} {user.lastName}
+                </p>
+                <p className="text-xs text-gray-400">{user.status ?? ""}</p>
+              </div>
+              <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                {user.firstName[0]}
+                {user.lastName[0]}
+              </div>
+            </div>
           </div>
         </header>
         <Sidebar
@@ -105,6 +112,7 @@ export default function Dashboard() {
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           onNavigate={setCurrentPage}
+          onSignOut={() => setShowLogoutModal(true)}
         />
         <div className="lg:pl-76 pt-2">
           <main className="p-6 lg:p-8 min-h-[calc(100vh-4rem)]">
@@ -114,7 +122,7 @@ export default function Dashboard() {
                 payments={payments}
                 paymentsLoading={paymentsLoading}
                 onNavigateToPayments={() => setCurrentPage("payments")}
-                onNavigateToProfile={() => setCurrentPage("profile")}
+                onNavigateToProfile={() => setCurrentPage("settings")}
                 onShowUnavailable={() => setShowUnavailableModal(true)}
                 announcements={announcements}
                 upcomingEvents={events}
@@ -129,8 +137,8 @@ export default function Dashboard() {
               />
             )}
             {currentPage === "help" && <HelpPage />}
-            {currentPage === "profile" && (
-              <ProfilePage user={user} updateProfile={updateProfile} />
+            {currentPage === "settings" && (
+              <SettingsPage user={user} updateProfile={updateProfile} />
             )}
             <Footer />
           </main>
@@ -139,6 +147,11 @@ export default function Dashboard() {
       <UnavailableModal
         isOpen={showUnavailableModal}
         onClose={() => setShowUnavailableModal(false)}
+      />
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleSignOut}
       />
       {(!user.status ||
         user.status === "" ||

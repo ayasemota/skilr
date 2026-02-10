@@ -11,11 +11,12 @@ import { Sidebar } from "@/components/Sidebar";
 import { DashboardPage } from "@/components/pages/DashboardPage";
 import { PaymentsPage } from "@/components/pages/PaymentsPage";
 import { HelpPage } from "@/components/pages/HelpPage";
-import { ProfilePage } from "@/components/pages/ProfilePage";
+import { SettingsPage } from "@/components/pages/SettingsPage";
 import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Logo";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { UnavailableModal } from "@/components/UnavailableModal";
+import { LogoutModal } from "@/components/LogoutModal";
 import { PendingApprovalOverlay } from "@/components/PendingApprovalOverlay";
 import { Preloader } from "@/components/Preloader";
 
@@ -38,6 +39,7 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUnavailableModal, setShowUnavailableModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showPreloader, setShowPreloader] = useState(true);
 
   useEffect(() => {
@@ -100,12 +102,7 @@ export default function Dashboard() {
               </button>
               <Logo />
             </div>
-            <ProfileDropdown
-              user={user}
-              onSignOut={handleSignOut}
-              onShowUnavailable={() => setShowUnavailableModal(true)}
-              onNavigateToProfile={() => setCurrentPage("profile")}
-            />
+            <ProfileDropdown user={user} />
           </div>
         </header>
         <Sidebar
@@ -113,6 +110,7 @@ export default function Dashboard() {
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           onNavigate={setCurrentPage}
+          onSignOut={() => setShowLogoutModal(true)}
         />
         <div className="lg:pl-76 pt-2">
           <main className="p-6 lg:p-8 min-h-[calc(100dvh-4rem)]">
@@ -122,7 +120,7 @@ export default function Dashboard() {
                 payments={payments}
                 paymentsLoading={paymentsLoading}
                 onNavigateToPayments={() => setCurrentPage("payments")}
-                onNavigateToProfile={() => setCurrentPage("profile")}
+                onNavigateToProfile={() => setCurrentPage("settings")}
                 onShowUnavailable={() => setShowUnavailableModal(true)}
                 upcomingEvents={events.filter(
                   (event): event is typeof event & { date: string } =>
@@ -141,8 +139,8 @@ export default function Dashboard() {
               />
             )}
             {currentPage === "help" && <HelpPage />}
-            {currentPage === "profile" && (
-              <ProfilePage user={user} updateProfile={updateProfile} />
+            {currentPage === "settings" && (
+              <SettingsPage user={user} updateProfile={updateProfile} />
             )}
             <Footer />
           </main>
@@ -151,6 +149,11 @@ export default function Dashboard() {
       <UnavailableModal
         isOpen={showUnavailableModal}
         onClose={() => setShowUnavailableModal(false)}
+      />
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleSignOut}
       />
       {(!user.status ||
         user.status === "" ||
