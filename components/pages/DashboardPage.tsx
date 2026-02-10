@@ -91,8 +91,17 @@ export const DashboardPage = ({
   announcements = [],
   upcomingEvents = [],
 }: DashboardPageProps) => {
-  const [showEventsModal, setShowEventsModal] = useState(false);
-  const [showAnnouncementsModal, setShowAnnouncementsModal] = useState(false);
+  // Separate state for "View All" lists
+  const [showAllEvents, setShowAllEvents] = useState(false);
+  const [showAllAnnouncements, setShowAllAnnouncements] = useState(false);
+
+  // Separate state for single item details
+  const [selectedEvent, setSelectedEvent] = useState<
+    (typeof upcomingEvents)[0] | null
+  >(null);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<
+    (typeof announcements)[0] | null
+  >(null);
 
   const recentPayments = payments.slice(0, 2);
   const displayEvents = upcomingEvents.slice(0, 3);
@@ -109,7 +118,7 @@ export const DashboardPage = ({
   const quickLinks = [
     { label: "Make Payment", onClick: onNavigateToPayments },
     { label: "Edit Profile", onClick: onNavigateToProfile },
-    { label: "Settings", onClick: onShowUnavailable },
+    { label: "Settings", onClick: onNavigateToProfile },
   ];
 
   return (
@@ -119,11 +128,10 @@ export const DashboardPage = ({
           <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
             {getGreeting()}, {user.firstName}!
           </h1>
-          <p className="text-gray-400">{user.email}</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex-1 w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Calendar className="text-blue-400" size={20} />
@@ -133,7 +141,7 @@ export const DashboardPage = ({
               </div>
               {upcomingEvents.length > 3 && (
                 <button
-                  onClick={() => setShowEventsModal(true)}
+                  onClick={() => setShowAllEvents(true)}
                   className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
                 >
                   View All
@@ -141,17 +149,17 @@ export const DashboardPage = ({
               )}
             </div>
             {displayEvents.length ? (
-              <div className="space-y-3">
+              <div className="space-y-3 flex-1">
                 {displayEvents.map((event, index) => (
                   <div
                     key={event.id || index}
                     className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 hover:border-blue-500/30 transition-colors duration-300 cursor-pointer"
-                    onClick={() => setShowEventsModal(true)}
+                    onClick={() => setSelectedEvent(event)}
                   >
                     <h3 className="font-medium text-white mb-1">
                       {event.title}
                     </h3>
-                    <p className="text-sm text-gray-400 line-clamp-2">
+                    <p className="text-sm text-gray-400 line-clamp-1">
                       {event.description}
                     </p>
                     <span className="text-xs text-gray-500 mt-2 block">
@@ -161,13 +169,13 @@ export const DashboardPage = ({
                 ))}
               </div>
             ) : (
-              <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 text-center text-gray-400">
+              <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 text-center text-gray-400 flex-1 flex items-center justify-center">
                 No upcoming events
               </div>
             )}
           </div>
 
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
+          <div className="flex-1 w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Megaphone className="text-purple-400" size={20} />
@@ -177,7 +185,7 @@ export const DashboardPage = ({
               </div>
               {announcements.length > 3 && (
                 <button
-                  onClick={() => setShowAnnouncementsModal(true)}
+                  onClick={() => setShowAllAnnouncements(true)}
                   className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
                 >
                   View All
@@ -185,52 +193,54 @@ export const DashboardPage = ({
               )}
             </div>
             {displayAnnouncements.length ? (
-              <div className="space-y-3">
+              <div className="space-y-3 flex-1">
                 {displayAnnouncements.map((item, index) => (
                   <div
                     key={item.id || index}
                     className="p-3 bg-gray-900/50 rounded-lg border border-gray-700/30 hover:border-purple-500/30 transition-colors duration-300 cursor-pointer"
-                    onClick={() => setShowAnnouncementsModal(true)}
+                    onClick={() => setSelectedAnnouncement(item)}
                   >
                     <h3 className="text-sm font-medium text-white mb-1">
                       {item.title}
                     </h3>
-                    <p className="text-xs text-gray-400 line-clamp-2">
+                    <p className="text-xs text-gray-400 line-clamp-1">
                       {item.description}
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 text-center text-gray-400">
+              <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 text-center text-gray-400 flex-1 flex items-center justify-center">
                 No announcements
               </div>
             )}
           </div>
+        </div>
 
-          <div className="bg-gray-800/50 border border-gray-700/50 rounded-2xl p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-white">
-                Recent Payments
-              </h2>
-              <button
-                onClick={onNavigateToPayments}
-                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                View All
-              </button>
+        <div className="bg-gray-800/50 border border-gray-700/50 rounded-2xl p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-white">
+              Recent Payments
+            </h2>
+            <button
+              onClick={onNavigateToPayments}
+              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              View All
+            </button>
+          </div>
+          {paymentsLoading ? (
+            <div className="flex justify-center py-6">
+              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
             </div>
-            {paymentsLoading ? (
-              <div className="flex justify-center py-6">
-                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-              </div>
-            ) : recentPayments.length ? (
-              <div className="space-y-3">
-                {recentPayments.map((payment) => (
-                  <div
-                    key={payment.id}
-                    className="p-3 bg-gray-900/50 rounded-lg border border-gray-700/30"
-                  >
+          ) : recentPayments.length ? (
+            <div className="space-y-3">
+              {recentPayments.map((payment) => (
+                <div
+                  key={payment.id}
+                  className="p-3 bg-gray-900/50 rounded-lg border border-gray-700/30 flex justify-between items-center"
+                >
+                  <div>
                     <p className="text-lg font-bold text-white">
                       ₦{formatCurrency(payment.amount)}
                     </p>
@@ -238,14 +248,25 @@ export const DashboardPage = ({
                       {getPaymentDateTime(payment)}
                     </p>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 text-center text-gray-400">
-                No payments yet
-              </div>
-            )}
-          </div>
+                  <div
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      payment.status === "Completed"
+                        ? "bg-green-500/10 text-green-400"
+                        : payment.status === "Failed"
+                          ? "bg-red-500/10 text-red-400"
+                          : "bg-yellow-500/10 text-yellow-400"
+                    }`}
+                  >
+                    {payment.status}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 text-center text-gray-400">
+              No payments yet
+            </div>
+          )}
         </div>
 
         <div className="mt-12">
@@ -267,16 +288,37 @@ export const DashboardPage = ({
       </div>
 
       <Modal
-        isOpen={showEventsModal}
-        onClose={() => setShowEventsModal(false)}
-        title="Upcoming Events"
+        isOpen={showAllEvents || !!selectedEvent}
+        onClose={() => {
+          setShowAllEvents(false);
+          setSelectedEvent(null);
+        }}
+        title={selectedEvent ? selectedEvent.title : "Upcoming Events"}
       >
         <div className="space-y-4">
-          {upcomingEvents.length > 0 ? (
+          {selectedEvent ? (
+            <div className="p-5 bg-gray-800/50 rounded-xl border border-gray-700/50">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="p-2 bg-blue-500/10 rounded-lg">
+                  <Calendar className="text-blue-400" size={24} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-white mb-1">
+                    {selectedEvent.title}
+                  </h3>
+                  <p className="text-sm text-gray-400">{selectedEvent.date}</p>
+                </div>
+              </div>
+              <p className="text-gray-300 whitespace-pre-wrap">
+                {selectedEvent.description}
+              </p>
+            </div>
+          ) : upcomingEvents.length > 0 ? (
             upcomingEvents.map((event, index) => (
               <div
                 key={event.id || index}
-                className="p-5 bg-gray-800/50 rounded-xl border border-gray-700/50"
+                className="p-5 bg-gray-800/50 rounded-xl border border-gray-700/50 hover:bg-gray-800 transition-colors cursor-pointer"
+                onClick={() => setSelectedEvent(event)}
               >
                 <div className="flex items-start gap-3 mb-3">
                   <div className="p-2 bg-blue-500/10 rounded-lg">
@@ -289,7 +331,9 @@ export const DashboardPage = ({
                     <p className="text-sm text-gray-400">{event.date}</p>
                   </div>
                 </div>
-                <p className="text-gray-300">{event.description}</p>
+                <p className="text-gray-300 line-clamp-2">
+                  {event.description}
+                </p>
               </div>
             ))
           ) : (
@@ -302,16 +346,36 @@ export const DashboardPage = ({
       </Modal>
 
       <Modal
-        isOpen={showAnnouncementsModal}
-        onClose={() => setShowAnnouncementsModal(false)}
-        title="Announcements"
+        isOpen={showAllAnnouncements || !!selectedAnnouncement}
+        onClose={() => {
+          setShowAllAnnouncements(false);
+          setSelectedAnnouncement(null);
+        }}
+        title={
+          selectedAnnouncement ? selectedAnnouncement.title : "Announcements"
+        }
       >
         <div className="space-y-4">
-          {announcements.length > 0 ? (
+          {selectedAnnouncement ? (
+            <div className="p-5 bg-gray-800/50 rounded-xl border border-gray-700/50">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="p-2 bg-purple-500/10 rounded-lg">
+                  <Megaphone className="text-purple-400" size={24} />
+                </div>
+                <h3 className="text-lg font-semibold text-white flex-1">
+                  {selectedAnnouncement.title}
+                </h3>
+              </div>
+              <p className="text-gray-300 whitespace-pre-wrap">
+                {selectedAnnouncement.description}
+              </p>
+            </div>
+          ) : announcements.length > 0 ? (
             announcements.map((announcement, index) => (
               <div
                 key={announcement.id || index}
-                className="p-5 bg-gray-800/50 rounded-xl border border-gray-700/50"
+                className="p-5 bg-gray-800/50 rounded-xl border border-gray-700/50 hover:bg-gray-800 transition-colors cursor-pointer"
+                onClick={() => setSelectedAnnouncement(announcement)}
               >
                 <div className="flex items-start gap-3 mb-3">
                   <div className="p-2 bg-purple-500/10 rounded-lg">
@@ -321,7 +385,9 @@ export const DashboardPage = ({
                     {announcement.title}
                   </h3>
                 </div>
-                <p className="text-gray-300">{announcement.description}</p>
+                <p className="text-gray-300 line-clamp-2">
+                  {announcement.description}
+                </p>
               </div>
             ))
           ) : (

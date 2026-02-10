@@ -1,10 +1,11 @@
-import { Home, CreditCard, HelpCircle } from "lucide-react";
+import { Home, CreditCard, HelpCircle, Settings, LogOut } from "lucide-react";
 
 interface SidebarProps {
   currentPage: string;
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (page: string) => void;
+  onSignOut?: () => void;
 }
 
 export const Sidebar = ({
@@ -12,6 +13,7 @@ export const Sidebar = ({
   isOpen,
   onClose,
   onNavigate,
+  onSignOut,
 }: SidebarProps) => {
   const handleNavigate = (page: string) => {
     onNavigate(page);
@@ -31,7 +33,7 @@ export const Sidebar = ({
           isOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 flex flex-col`}
       >
-        <nav className="p-4 space-y-2 flex-1">
+        <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
           <button
             onClick={() => handleNavigate("dashboard")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg ${
@@ -67,6 +69,32 @@ export const Sidebar = ({
             <span>Help & Support</span>
           </button>
         </nav>
+
+        {onSignOut && (
+          <div className="p-4 space-y-2 border-t border-gray-800">
+            <button
+              onClick={() => handleNavigate("settings")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg ${
+                currentPage === "settings"
+                  ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                  : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
+              }`}
+            >
+              <Settings size={20} />
+              <span>Settings</span>
+            </button>
+            <button
+              onClick={() => {
+                onSignOut();
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors duration-300"
+            >
+              <LogOut size={20} />
+              <span>Log Out</span>
+            </button>
+          </div>
+        )}
       </aside>
     </>
   );

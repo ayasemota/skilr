@@ -32,7 +32,6 @@ export const AuthPage = ({
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Password visibility states
   const [showSignInPassword, setShowSignInPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -236,7 +235,6 @@ export const AuthPage = ({
 
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 shadow-2xl">
             {isForgotPassword ? (
-              // Forgot Password Form
               <form onSubmit={handleForgotPasswordSubmit} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -275,7 +273,6 @@ export const AuthPage = ({
                 </p>
               </form>
             ) : isSignUp ? (
-              // Sign Up Form
               <form onSubmit={handleSignUpSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -433,7 +430,6 @@ export const AuthPage = ({
                 </p>
               </form>
             ) : (
-              // Sign In Form
               <form onSubmit={handleSignInSubmit} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">

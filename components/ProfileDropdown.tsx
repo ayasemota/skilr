@@ -1,20 +1,11 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, User, LogOut, Settings } from "lucide-react";
 import { User as UserType } from "@/types";
 
 interface ProfileDropdownProps {
   user: UserType;
-  onSignOut: () => void;
-  onShowUnavailable: () => void;
-  onNavigateToProfile: () => void;
 }
 
-export const ProfileDropdown = ({
-  user,
-  onSignOut,
-  onShowUnavailable,
-  onNavigateToProfile,
-}: ProfileDropdownProps) => {
+export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -47,50 +38,7 @@ export const ProfileDropdown = ({
           {user.firstName[0]}
           {user.lastName[0]}
         </div>
-        <ChevronDown
-          size={16}
-          className={`text-gray-400 transition-transform duration-300 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
       </button>
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-2xl z-50 animate-fade-in">
-          <div className="p-2 space-y-1">
-            <button
-              onClick={() => {
-                onNavigateToProfile();
-                setIsOpen(false);
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors duration-300"
-            >
-              <User size={18} />
-              <span>View Profile</span>
-            </button>
-            <button
-              onClick={() => {
-                onShowUnavailable();
-                setIsOpen(false);
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors duration-300"
-            >
-              <Settings size={18} />
-              <span>Settings</span>
-            </button>
-            <div className="border-t border-gray-700 my-1"></div>
-            <button
-              onClick={() => {
-                onSignOut();
-                setIsOpen(false);
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors duration-300"
-            >
-              <LogOut size={18} />
-              <span>Sign Out</span>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

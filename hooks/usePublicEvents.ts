@@ -52,7 +52,7 @@ export const usePublicEvents = () => {
           message: error instanceof Error ? error.message : String(error),
         });
         setLoading(false);
-      }
+      },
     );
 
     return unsubscribe;
