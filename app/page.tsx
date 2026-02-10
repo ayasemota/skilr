@@ -11,6 +11,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { DashboardPage } from "@/components/pages/DashboardPage";
 import { PaymentsPage } from "@/components/pages/PaymentsPage";
 import { HelpPage } from "@/components/pages/HelpPage";
+import { ProfilePage } from "@/components/pages/ProfilePage";
 import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Logo";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
@@ -19,8 +20,14 @@ import { PendingApprovalOverlay } from "@/components/PendingApprovalOverlay";
 import { Preloader } from "@/components/Preloader";
 
 export default function Dashboard() {
-  const { isLoggedIn, user, signOut, loading, updateUnclearedAmount } =
-    useAuth();
+  const {
+    isLoggedIn,
+    user,
+    signOut,
+    loading,
+    updateUnclearedAmount,
+    updateProfile,
+  } = useAuth();
   const { payments, loading: paymentsLoading } = usePayments(
     user?.email || null,
   );
@@ -97,6 +104,7 @@ export default function Dashboard() {
               user={user}
               onSignOut={handleSignOut}
               onShowUnavailable={() => setShowUnavailableModal(true)}
+              onNavigateToProfile={() => setCurrentPage("profile")}
             />
           </div>
         </header>
@@ -114,6 +122,7 @@ export default function Dashboard() {
                 payments={payments}
                 paymentsLoading={paymentsLoading}
                 onNavigateToPayments={() => setCurrentPage("payments")}
+                onNavigateToProfile={() => setCurrentPage("profile")}
                 onShowUnavailable={() => setShowUnavailableModal(true)}
                 upcomingEvents={events.filter(
                   (event): event is typeof event & { date: string } =>
@@ -132,6 +141,9 @@ export default function Dashboard() {
               />
             )}
             {currentPage === "help" && <HelpPage />}
+            {currentPage === "profile" && (
+              <ProfilePage user={user} updateProfile={updateProfile} />
+            )}
             <Footer />
           </main>
         </div>

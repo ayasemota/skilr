@@ -6,12 +6,14 @@ interface ProfileDropdownProps {
   user: UserType;
   onSignOut: () => void;
   onShowUnavailable: () => void;
+  onNavigateToProfile: () => void;
 }
 
 export const ProfileDropdown = ({
   user,
   onSignOut,
   onShowUnavailable,
+  onNavigateToProfile,
 }: ProfileDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -57,7 +59,7 @@ export const ProfileDropdown = ({
           <div className="p-2 space-y-1">
             <button
               onClick={() => {
-                onShowUnavailable();
+                onNavigateToProfile();
                 setIsOpen(false);
               }}
               className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors duration-300"
