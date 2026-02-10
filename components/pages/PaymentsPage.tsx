@@ -30,17 +30,12 @@ const getPaymentDateTime = (payment: Payment) => {
     "seconds" in payment.createdAt
   ) {
     const date = new Date(payment.createdAt.seconds * 1000);
-    const dateStr = date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    const timeStr = date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-    return `${dateStr} at ${timeStr}`;
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yy = String(date.getFullYear()).slice(-2);
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+    return `${dd}/${mm}/${yy} | ${hh}:${min}`;
   }
   return payment.date || "N/A";
 };
@@ -245,7 +240,7 @@ export const PaymentsPage = ({
           <div className="space-y-4">
             <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700/30 space-y-2">
               <div className="flex justify-between text-gray-300">
-                <span>Base Amount</span>
+                <span>Amount</span>
                 <span>₦{formatCurrency(baseAmount)}</span>
               </div>
               <div className="flex justify-between text-gray-300">
@@ -341,6 +336,7 @@ export const PaymentsPage = ({
             </label>
             <input
               type="text"
+              inputMode="numeric"
               value={formatInputValue(paymentAmount)}
               onChange={handleAmountChange}
               placeholder="0"

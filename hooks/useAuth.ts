@@ -70,11 +70,11 @@ export const useAuth = () => {
       );
 
       const userData: User = {
-        firstName: form.firstName,
-        lastName: form.lastName,
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
         email: form.email,
         phone: form.phone,
-        status: "Unconfirmed",
+        status: "",
       };
 
       await setDoc(doc(db, "users", userCredential.user.uid), userData);

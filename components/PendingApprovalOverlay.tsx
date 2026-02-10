@@ -4,6 +4,7 @@ import { Clock, Lock, LogOut } from "lucide-react";
 
 interface PendingApprovalOverlayProps {
   onSignOut: () => void;
+  status?: string;
 }
 
 export const PendingApprovalOverlay = ({
@@ -24,7 +25,8 @@ export const PendingApprovalOverlay = ({
         <h1 className="pending-title">Account Locked</h1>
 
         <p className="pending-description">
-          Your account is currently locked. Contact your administrator for assistance.
+          Your account is currently locked. Contact your administrator for
+          assistance.
         </p>
 
         <button onClick={onSignOut} className="pending-signout-btn">
