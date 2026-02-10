@@ -288,7 +288,7 @@ export const AuthPage = ({
                       onChange={(e) =>
                         setSignUpForm({
                           ...signUpForm,
-                          firstName: e.target.value,
+                          firstName: e.target.value.replace(/\s/g, ""),
                         })
                       }
                       placeholder="First Name"
@@ -306,7 +306,7 @@ export const AuthPage = ({
                       onChange={(e) =>
                         setSignUpForm({
                           ...signUpForm,
-                          lastName: e.target.value,
+                          lastName: e.target.value.replace(/\s/g, ""),
                         })
                       }
                       placeholder="Last Name"
@@ -338,7 +338,10 @@ export const AuthPage = ({
                     type="tel"
                     value={signUpForm.phone}
                     onChange={(e) =>
-                      setSignUpForm({ ...signUpForm, phone: e.target.value })
+                      setSignUpForm({
+                        ...signUpForm,
+                        phone: e.target.value.trim(),
+                      })
                     }
                     placeholder="Phone Number"
                     className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"

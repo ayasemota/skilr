@@ -140,7 +140,14 @@ export default function Dashboard() {
         isOpen={showUnavailableModal}
         onClose={() => setShowUnavailableModal(false)}
       />
-      {!user.status && <PendingApprovalOverlay onSignOut={handleSignOut} />}
+      {(!user.status ||
+        user.status === "" ||
+        user.status === "Unconfirmed") && (
+        <PendingApprovalOverlay
+          onSignOut={handleSignOut}
+          status={user.status}
+        />
+      )}
     </>
   );
 }

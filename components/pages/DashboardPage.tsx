@@ -31,17 +31,12 @@ const getPaymentDateTime = (payment: Payment) => {
     "seconds" in payment.createdAt
   ) {
     const date = new Date(payment.createdAt.seconds * 1000);
-    const dateStr = date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    const timeStr = date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-    return `${dateStr} at ${timeStr}`;
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yy = String(date.getFullYear()).slice(-2);
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+    return `${dd}/${mm}/${yy} | ${hh}:${min}`;
   }
   return payment.paymentDate || payment.date || "N/A";
 };
@@ -101,6 +96,14 @@ export const DashboardPage = ({
   const displayEvents = upcomingEvents.slice(0, 3);
   const displayAnnouncements = announcements.slice(0, 3);
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return "Good Morning";
+    if (hour >= 12 && hour < 17) return "Good Afternoon";
+    if (hour >= 17 && hour < 21) return "Good Evening";
+    return "Good Night";
+  };
+
   const quickLinks = [
     { label: "Make Payment", onClick: onNavigateToPayments },
     { label: "Edit Profile", onClick: onShowUnavailable },
@@ -112,7 +115,7 @@ export const DashboardPage = ({
       <div className="space-y-6">
         <div className="bg-linear-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-6 md:p-8">
           <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
-            Hello, {user.firstName} {user.lastName}!
+            {getGreeting()}, {user.firstName}!
           </h1>
           <p className="text-gray-400">{user.email}</p>
         </div>
@@ -229,7 +232,9 @@ export const DashboardPage = ({
                     <p className="text-lg font-bold text-white">
                       ₦{formatCurrency(payment.amount)}
                     </p>
-                    <p className="text-xs text-gray-500">{getPaymentDateTime(payment)}</p>
+                    <p className="text-xs text-gray-500">
+                      {getPaymentDateTime(payment)}
+                    </p>
                   </div>
                 ))}
               </div>
