@@ -11,6 +11,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { DashboardPage } from "@/components/pages/DashboardPage";
 import { PaymentsPage } from "@/components/pages/PaymentsPage";
 import { HelpPage } from "@/components/pages/HelpPage";
+import { ProfilePage } from "@/components/pages/ProfilePage";
 import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Logo";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
@@ -19,8 +20,14 @@ import { PendingApprovalOverlay } from "@/components/PendingApprovalOverlay";
 import { Preloader } from "@/components/Preloader";
 
 export default function Dashboard() {
-  const { isLoggedIn, user, signOut, loading, updateUnclearedAmount } =
-    useAuth();
+  const {
+    isLoggedIn,
+    user,
+    signOut,
+    loading,
+    updateUnclearedAmount,
+    updateProfile,
+  } = useAuth();
   const { payments, loading: paymentsLoading } = usePayments(
     user?.email || null,
   );
@@ -36,7 +43,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
-    if (hash && ["dashboard", "payments", "help"].includes(hash)) {
+    if (hash && ["dashboard", "payments", "help", "profile"].includes(hash)) {
       setCurrentPage(hash);
     }
   }, []);
@@ -89,6 +96,7 @@ export default function Dashboard() {
               user={user}
               onSignOut={handleSignOut}
               onShowUnavailable={() => setShowUnavailableModal(true)}
+              onNavigateToProfile={() => setCurrentPage("profile")}
             />
           </div>
         </header>
@@ -106,6 +114,7 @@ export default function Dashboard() {
                 payments={payments}
                 paymentsLoading={paymentsLoading}
                 onNavigateToPayments={() => setCurrentPage("payments")}
+                onNavigateToProfile={() => setCurrentPage("profile")}
                 onShowUnavailable={() => setShowUnavailableModal(true)}
                 announcements={announcements}
                 upcomingEvents={events}
@@ -120,6 +129,9 @@ export default function Dashboard() {
               />
             )}
             {currentPage === "help" && <HelpPage />}
+            {currentPage === "profile" && (
+              <ProfilePage user={user} updateProfile={updateProfile} />
+            )}
             <Footer />
           </main>
         </div>

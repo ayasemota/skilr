@@ -147,6 +147,33 @@ export const useAuth = () => {
     }
   };
 
+  const updateProfile = async (fields: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+  }) => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error("No user logged in");
+
+      const sanitized = {
+        firstName: fields.firstName.replace(/\s/g, ""),
+        lastName: fields.lastName.replace(/\s/g, ""),
+        phone: fields.phone.trim(),
+      };
+
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, sanitized);
+
+      if (user) {
+        setUser({ ...user, ...sanitized });
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      throw error;
+    }
+  };
+
   return {
     isLoggedIn,
     user,
@@ -157,5 +184,6 @@ export const useAuth = () => {
     forgotPassword,
     resetPassword,
     updateUnclearedAmount,
+    updateProfile,
   };
 };

@@ -7,6 +7,7 @@ interface DashboardPageProps {
   payments: Payment[];
   paymentsLoading: boolean;
   onNavigateToPayments: () => void;
+  onNavigateToProfile: () => void;
   onShowUnavailable: () => void;
   announcements?: { id?: string; title: string; description: string }[];
   upcomingEvents?: {
@@ -85,6 +86,7 @@ export const DashboardPage = ({
   payments,
   paymentsLoading,
   onNavigateToPayments,
+  onNavigateToProfile,
   onShowUnavailable,
   announcements = [],
   upcomingEvents = [],
@@ -106,7 +108,7 @@ export const DashboardPage = ({
 
   const quickLinks = [
     { label: "Make Payment", onClick: onNavigateToPayments },
-    { label: "Edit Profile", onClick: onShowUnavailable },
+    { label: "Edit Profile", onClick: onNavigateToProfile },
     { label: "Settings", onClick: onShowUnavailable },
   ];
 
